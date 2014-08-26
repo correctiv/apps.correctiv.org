@@ -1,0 +1,74 @@
+{% extends 'bussgelder/base.html' %}
+
+{% load humanize %}
+{% load highlight %}
+
+{% block title %}Suche {{ query }}{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <h2>Suche nach Bußgeldempfängern</h2>
+            <form method="get" action=".">
+                <div class="input-group">
+                    {{ form.q }}
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">Suchen</button>
+                    </span>
+                </div><!-- /input-group -->
+            </form>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 2em">
+        <div class="col-lg-2 col-md-3 col-sm-3">
+            <p class="badge">
+                {{ page.paginator.count }} Bußgelder
+            </p>
+            <dl>
+                {% if facets.fields.state %}
+                    <dt>Bundesland</dt>
+                    {% for facet in facets.fields.state %}
+                        {% if facet.0 %}
+                            <dd>
+                                <a href="?selected_facets=state_exact:{{ facet.0|urlencode }}{{ getvars }}">
+                                    {{ facet.0 }}
+                                </a>
+                                ({{ facet.1 }})
+                            </dd>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </dl>
+        </div>
+        <div class="col-lg-10 col-md-9 col-sm-9">
+            {% if page.object_list %}
+                <table class="table">
+                {% for result in page.object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'bussgelder_organisation_detail' slug=result.organisation_slug %}">
+                                {{ result.organisation_name }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ result.amount|intcomma }} €
+                        </td>
+                        <td class="text-muted">
+                            {% if query %}
+                                {% highlight result.text with query %}
+                            {% else %}
+                                {{ result.state }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </table>
+                {% if page.has_previous or page.has_next %}
+                    {% include "pagination.html" with page_obj=page %}
+                {% endif %}
+            {% else %}
+                <p>Keine Ergebnisse gefunden</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

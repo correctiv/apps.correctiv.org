@@ -1,0 +1,51 @@
+{% extends "bussgelder/base.html" %}
+
+{% load humanize %}
+
+{% block title %}Empfänger {{ object.organisation.name }}{% endblock %}
+
+{% block additional_meta %}
+<meta name="description" content="{{ object.organisation.name }} - {{ object.content }}">
+
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+  <h2>
+    {{ object.name }}
+  </h2>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <p>
+      <a href="{% url 'haystack_search' %}">Zurück zur Suche</a>
+    </p>
+    <table class="table">
+    {% with fines=object.fines.all %}
+      {% for fine in fines %}
+      <tr>
+        <td>{{ fine.amount|intcomma }} €</td>
+        <td>{{ fine.state_label }}</td>
+        <td>{{ fine.city }} {{ fine.postcode }}</td>
+        <td>{{ fine.year }}</td>
+        <td class="text-muted">
+          {% if fine.address %}
+            {{ fine.address|linebreaksbr }}
+          {% endif %}
+          {% if fine.org_details %}
+            {{ fine.org_details|linebreaksbr }}
+          {% endif %}
+          {% if fine.bank_details %}
+            {{ fine.bank_details|linebreaksbr }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    {% endwith %}
+    </table>
+  </div>
+</div>
+
+{% endblock %}

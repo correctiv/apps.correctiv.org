@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" class="no-js">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>{% block title %}{% endblock %} - {% block base_title %}{% endblock %}</title>
+  <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ STATIC_URL }}css/style.css" rel="stylesheet">
+  {% block extra_style %}
+  {% endblock %}
+  <meta http-equiv="Content-Language" content="{{ LANGUAGE_CODE }}" />
+  <meta name="language" content="{{ LANGUAGE_CODE }}" />
+
+  {% block additional_meta %}
+  {% endblock %}
+
+  <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
+
+  {% block extra_head %}
+  {% endblock %}
+
+</head>
+
+<body>
+  {% block base_body %}
+    <div class="main container">
+    {% block body %}{% endblock %}
+    </div>
+  {% endblock %}
+
+  <footer class="container" id="footer">
+    {% block footer %}{% endblock %}
+  </footer>
+
+  <script src="{{ STATIC_URL }}js/jquery.min.js"></script>
+  <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+
+  {% block extra_footer %}
+    {% block scripts %}
+    {% endblock %}
+  {% endblock %}
+  {% if not debug %}
+    {% block tracking_code %}
+    {% endblock %}
+  {% endif %}
+</body>
+</html>

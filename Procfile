@@ -1,0 +1,1 @@
+web: gunicorn bussgelder_project.wsgi:application
