@@ -1,7 +1,6 @@
 {% extends 'bussgelder/base.html' %}
 
 {% load humanize %}
-{% load highlight %}
 
 {% block title %}Suche {{ query }}{% endblock %}
 
@@ -22,18 +21,22 @@
     <div class="row" style="margin-top: 2em">
         <div class="col-lg-2 col-md-3 col-sm-3">
             <p class="badge">
-                {{ page.paginator.count }} Bußgelder
+                {{ page_obj.paginator.count|intcomma }} Bußgelder
+            </p>
+            <p>
+                Gesamtsumme der Suche:<br/>
+                <span class="badge">{{ result.aggregations.total_sum.value|intcomma }}&nbsp;€</span>
             </p>
             <dl>
-                {% if facets.fields.state %}
+                {% if result.aggregations.states %}
                     <dt>Bundesland</dt>
-                    {% for facet in facets.fields.state %}
-                        {% if facet.0 %}
+                    {% for facet in result.aggregations.states.buckets %}
+                        {% if facet.doc_count %}
                             <dd>
-                                <a href="?selected_facets=state_exact:{{ facet.0|urlencode }}{{ getvars }}">
-                                    {{ facet.0 }}
+                                <a href="?selected_facets=state_exact:{{ facet.key|urlencode }}{{ getvars }}">
+                                    {{ facet.key }}
                                 </a>
-                                ({{ facet.1 }})
+                                ({{ facet.doc_count }})
                             </dd>
                         {% endif %}
                     {% endfor %}
@@ -41,30 +44,33 @@
             </dl>
         </div>
         <div class="col-lg-10 col-md-9 col-sm-9">
-            {% if page.object_list %}
+            {% if object_list %}
                 <table class="table">
-                {% for result in page.object_list %}
+                {% for result in object_list %}
                     <tr>
                         <td>
                             <a href="{% url 'bussgelder_organisation_detail' slug=result.organisation_slug %}">
                                 {{ result.organisation_name }}
                             </a>
                         </td>
+                        <td class="text-right">
+                            {{ result.amount|intcomma }}&nbsp;€
+                        </td>
                         <td>
-                            {{ result.amount|intcomma }} €
+                            {{ result.state_name }}
                         </td>
                         <td class="text-muted">
                             {% if query %}
-                                {% highlight result.text with query %}
+                                {{ result.text_highlight|safe }}
                             {% else %}
-                                {{ result.state }}
+                                
                             {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
                 </table>
-                {% if page.has_previous or page.has_next %}
-                    {% include "pagination.html" with page_obj=page %}
+                {% if is_paginated %}
+                    {% include "pagination.html" with page_obj=page_obj %}
                 {% endif %}
             {% else %}
                 <p>Keine Ergebnisse gefunden</p>

@@ -107,6 +107,7 @@ class Fine(models.Model):
         ('lg', u'Landgericht'),
         ('olg', u'Oberlandgericht'),
     )
+    DEPARTMENTS_DICT = dict(DEPARTMENTS)
 
     organisation = models.ForeignKey(Organisation, related_name='fines')
     original_name = models.CharField(max_length=512)
@@ -138,3 +139,7 @@ class Fine(models.Model):
     @property
     def state_label(self):
         return GERMAN_STATES_DICT[self.state]
+
+    @property
+    def department_label(self):
+        return self.DEPARTMENTS_DICT[self.department]

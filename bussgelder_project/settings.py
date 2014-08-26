@@ -49,8 +49,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
-    'haystack',
-
     'bussgelder',
 )
 
@@ -106,15 +104,7 @@ MEDIA_URL = get_env('MEDIA_URL', '/media/')
 
 FILE_URL_PREFIX = get_env('FILE_URL_PREFIX', 'http://auskunftsrechturteile.netzwerkrecherche.de/')
 
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': get_env('BONSAI_URL', 'http://127.0.0.1:9200/'),
-        'INDEX_NAME': 'haystack',
-    },
-}
-
+ELASTICSEARCH_URL = get_env('BONSAI_URL', 'http://127.0.0.1:9200/')
 
 try:
     from .local_settings import *  # noqa

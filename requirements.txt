@@ -1,7 +1,7 @@
 Django==1.6.6
 dj-database-url==0.3.0
 dj-static==0.0.5
-django-haystack==2.1.0
+elasticsearch==1.2.0
 gunicorn==19.0.0
 honcho==0.5.0
 psycopg2==2.5.3
@@ -12,4 +12,5 @@ simplejson==3.5.3
 six==1.7.3
 static==1.0.2
 unicodecsv==0.9.4
+urllib3==1.9
 wsgiref==0.1.2

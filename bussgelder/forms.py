@@ -1,9 +1,10 @@
 from django import forms
 
-from haystack.forms import FacetedSearchForm
+from .search_indexes import FineIndex
+from .search_utils import SearchQueryset
 
 
-class FineSearchForm(FacetedSearchForm):
+class FineSearchForm(forms.Form):
     q = forms.CharField(
         required=False,
         label='Suche',
@@ -14,16 +15,26 @@ class FineSearchForm(FacetedSearchForm):
                 'placeholder': 'Ihre Sucheingabe'
             }))
 
-    def search(self):
-        return super(FineSearchForm, self).search().highlight()
+    def no_query_found(self, idx, size):
+        return SearchQueryset(
+            idx,
+            '*',
+            size=size
+        )
 
-    def no_query_found(self):
-        """
-        Determines the behavior when no query was found.
+    def search(self, size=None):
+        idx = FineIndex()
 
-        By default, no results are returned (``EmptySearchQuerySet``).
+        if not self.is_valid():
+            return self.no_query_found(idx, size)
 
-        Should you want to show all results, override this method in your
-        own ``SearchForm`` subclass and do ``return self.searchqueryset.all()``.
-        """
-        return self.searchqueryset.all().order_by('-amount')
+        if not self.cleaned_data.get('q'):
+            return self.no_query_found(idx, size)
+
+        sqs = SearchQueryset(
+            idx,
+            self.cleaned_data.get('q'),
+            size=size
+        )
+
+        return sqs

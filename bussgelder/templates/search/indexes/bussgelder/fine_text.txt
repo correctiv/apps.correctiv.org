@@ -3,5 +3,7 @@
 {{ object.address }}
 {{ object.org_details }}
 {{ object.bank_details }}
+{{ object.department_label }}
+{{ object.department_detail }}
 {{ object.city }}
 {{ object.postcode }}
