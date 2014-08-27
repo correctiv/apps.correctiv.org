@@ -209,7 +209,6 @@ class OrganisationIndex(SearchIndex):
                     }
                 }
             })
-        print query
         return query
 
     def get_mapping(cls):

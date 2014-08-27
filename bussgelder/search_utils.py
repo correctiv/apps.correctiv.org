@@ -45,7 +45,6 @@ class SearchQueryset(QuerySet):
             offset=self.start,
             **self.kwargs
         )
-        print self._results
         self._total = self._results['total']
         self._result_cache = self._results['results']
 

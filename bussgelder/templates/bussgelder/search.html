@@ -1,80 +1,143 @@
 {% extends 'bussgelder/base.html' %}
 
 {% load humanize %}
+{% load bussgelder_tags %}
 
 {% block title %}Suche {{ query }}{% endblock %}
 
 {% block body %}
+    {% facet_vars "" "getvars" %}
     <div class="row">
-        <div class="col-lg-8 col-lg-offset-2">
-            <h2>Suche nach Bußgeldempfängern</h2>
-            <form method="get" action=".">
+        <div class="col-lg-8 col-lg-offset-3">
+            <h2>Suche nach Zuwendungsempfängern</h2>
+            <form method="get" action="?{{ getvars }}">
                 <div class="input-group">
                     {{ form.q }}
                     <span class="input-group-btn">
                         <button class="btn btn-default" type="submit">Suchen</button>
                     </span>
                 </div><!-- /input-group -->
+                <div class="pull-right">
+                    <p>
+                    Sortiere nach:
+                    {% for radio in form.sort %}
+                        <label class="radio-inline">
+                            {{ radio }}
+                        </label>
+                    {% endfor %}
+                    </p>
+                </div>
             </form>
         </div>
     </div>
     <div class="row" style="margin-top: 2em">
-        <div class="col-lg-2 col-md-3 col-sm-3">
-            <p class="badge">
-                {{ page_obj.paginator.count|intcomma }} Bußgelder
+        <div class="col-lg-3 col-md-4 col-sm-4">
+            <p>
+                <strong>{{ page_obj.paginator.count|intcomma }}</strong> Organisationen
             </p>
             <p>
                 Gesamtsumme der Suche:<br/>
-                <span class="badge">{{ result.aggregations.total_sum.value|intcomma }}&nbsp;€</span>
+                <strong>{{ result.aggregations.total_sum.value|intcomma }}&nbsp;€</strong>
             </p>
-            <dl>
-                {% if result.aggregations.states %}
-                    <dt>Bundesland</dt>
-                    {% for facet in result.aggregations.states.buckets %}
-                        {% if facet.doc_count %}
-                            <dd>
-                                <a href="?selected_facets=state_exact:{{ facet.key|urlencode }}{{ getvars }}">
-                                    {{ facet.key }}
+            {% if result.aggregations.fines.states %}
+                <h4>Zugewiesen in</h4>
+                <table class="table table-supercondensed">
+                {% for facet in result.aggregations.fines.states.buckets|dictsort:"key" %}
+                    {% if facet.doc_count %}
+                        <tr>
+                            <td class="text-muted">
+                                {{ facet.doc_count }}
+                            </td>
+                            <td>
+                            {% facet_active "state" facet.key as facet_is_active %}
+                                    {% if facet_is_active %}
+                                        {% get_state_name facet.key %}
+                                        <a href="?{% facet_vars "state" facet.key %}">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="?{% facet_vars "state" facet.key %}">
+                                            {% get_state_name facet.key %}
+                                        </a>
+                                    {% endif %}
                                 </a>
-                                ({{ facet.doc_count }})
-                            </dd>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </dl>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </table>
+            {% endif %}
+            {% if result.aggregations.fines.years %}
+                <h4>Aus dem Jahr</h4>
+                <table class="table table-supercondensed">
+                {% for facet in result.aggregations.fines.years.buckets|dictsort:"key" %}
+                    {% if facet.doc_count %}
+                        <tr>
+                            <td class="text-muted">
+                                {{ facet.doc_count }}
+                            </td>
+                            <td>
+                            {% facet_active "year" facet.key as facet_is_active %}
+                                    {% if facet_is_active %}
+                                        {{ facet.key }}
+                                        <a href="?{% facet_vars "year" facet.key %}">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="?{% facet_vars "year" facet.key %}">
+                                            {{ facet.key }}
+                                        </a>
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </table>
+            {% endif %}
         </div>
-        <div class="col-lg-10 col-md-9 col-sm-9">
+        <div class="col-lg-9 col-md-8 col-sm-8">
             {% if object_list %}
                 <table class="table">
                 {% for result in object_list %}
                     <tr>
                         <td>
-                            <a href="{% url 'bussgelder_organisation_detail' slug=result.organisation_slug %}">
-                                {{ result.organisation_name }}
+                            <a href="{% url 'bussgelder_organisation_detail' slug=result.slug %}">
+                                {{ result.name }}
                             </a>
                         </td>
                         <td class="text-right">
-                            {{ result.amount|intcomma }}&nbsp;€
-                        </td>
-                        <td>
-                            {{ result.state_name }}
+                            {{ result.amount|intcomma_floatformat:2 }}&nbsp;€<br/>
+                            <small class="text-muted">
+                                {% if result.fines|length > 1%}
+                                    in {{ result.fines|length }}
+                                {% else %}
+                                    in 1
+                                {% endif %}
+                            </small>
                         </td>
                         <td class="text-muted">
                             {% if query %}
-                                {{ result.text_highlight|safe }}
-                            {% else %}
-                                
+                                {{ result.fines_text_highlight|safe }}
                             {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
                 </table>
                 {% if is_paginated %}
-                    {% include "pagination.html" with page_obj=page_obj %}
+                    {% include "pagination.html" with page_obj=page_obj getvars="&"|add:getvars %}
                 {% endif %}
             {% else %}
                 <p>Keine Ergebnisse gefunden</p>
             {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    $('.radio-inline').click(function(){
+        $(this).parents('form').submit();
+    })
+    </script>
 {% endblock %}

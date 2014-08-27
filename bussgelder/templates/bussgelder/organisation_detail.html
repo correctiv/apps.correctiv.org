@@ -1,6 +1,7 @@
 {% extends "bussgelder/base.html" %}
 
 {% load humanize %}
+{% load bussgelder_tags %}
 
 {% block title %}Empfänger {{ object.organisation.name }}{% endblock %}
 
@@ -14,8 +15,22 @@
 <div class="page-header">
   <h2>
     {{ object.name }}
+    <span class="label label-info">
+      {{ object.sum_fines|intcomma }}&nbsp;€
+    </span>
   </h2>
 </div>
+
+{% if object.note %}
+  <div class="row">
+    <div class="col-lg-8">
+      <h3>Hinweise zu dieser Organisation</h3>
+      <p>
+        {{ object.note|linebreaks }}
+      </p>
+    </div>
+  </div>
+{% endif %}
 
 <div class="row">
   <div class="col-lg-12">
@@ -23,29 +38,75 @@
       <a href="{% url 'bussgelder_search' %}">Zurück zur Suche</a>
     </p>
     <table class="table">
-    {% with fines=object.fines.all %}
-      {% for fine in fines %}
-      <tr>
-        <td class="text-right">{{ fine.amount|intcomma }} €</td>
-        <td>{{ fine.state_label }}</td>
-        <td>{{ fine.city }} {{ fine.postcode }}</td>
-        <td>{{ fine.year }}</td>
-        <td>{{ fine.original_name }}</td>
-        <td class="text-muted">
-          {% if fine.address %}
-            {{ fine.address|linebreaksbr }}
-          {% endif %}
-          {% if fine.org_details %}
-            {{ fine.org_details|linebreaksbr }}
-          {% endif %}
-          {% if fine.bank_details %}
-            {{ fine.bank_details|linebreaksbr }}
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    {% endwith %}
+      <thead>
+        <tr>
+          <th>
+            Empfänger Name
+          </th>
+          <th class="text-right">
+            Betrag
+          </th>
+          <th>
+            Bundesland
+          </th>
+          <th>
+            Quelle
+          </th>
+          <th>
+            Details
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      {% with fines=object.fines.all %}
+        {% for fine in fines %}
+        <tr>
+          <td>{{ fine.original_name }}</td>
+          <td class="text-right">
+            {{ fine.amount|intcomma_floatformat:2 }}&nbsp;€
+          </td>
+          <td>{{ fine.state_label }}</td>
+          <td>
+            <a href="{{ MEDIA_URL }}{{ fine.source_file }}">
+              {{ fine.source_file_extension|upper }}
+            </a>
+          </td>
+          <td class="text-muted">
+            {% if fine.city or fine.postcode %}
+              {{ fine.city }} {{ fine.postcode }}<br/>
+            {% endif %}
+            {% if fine.address %}
+              {{ fine.address|linebreaksbr }}<br/>
+            {% endif %}
+            {% if fine.org_details %}
+              {{ fine.org_details|linebreaksbr }}<br/>
+            {% endif %}
+            {% if fine.bank_details %}
+              {{ fine.bank_details|linebreaksbr }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      {% endwith %}
+      </tbody>
     </table>
+    <hr/>
+    <h3>
+      <a href="{% url 'bussgelder_search' %}?q={{ object.name|urlencode }}">
+        Ähnliche Empfänger
+      </a>
+    </h3>
+    <ul class="list-unstyled">
+      {% for obj in mlt.results %}
+        {% if obj.id != object.id %}
+          <li>
+            <a href="{% url 'bussgelder_organisation_detail' slug=obj.slug %}">
+              {{ obj.name }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
   </div>
 </div>
 

@@ -11,6 +11,7 @@ requests==2.3.0
 simplejson==3.5.3
 six==1.7.3
 static==1.0.2
+unicode-slugify==0.1.1
 unicodecsv==0.9.4
 urllib3==1.9
 wsgiref==0.1.2

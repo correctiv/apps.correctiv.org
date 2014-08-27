@@ -1,3 +1,9 @@
-.highlighted {
-  background-color: #ffffa3;
+.table-supercondensed > thead > tr > th,
+.table-supercondensed > tbody > tr > th,
+.table-supercondensed > tfoot > tr > th,
+.table-supercondensed > thead > tr > td,
+.table-supercondensed > tbody > tr > td,
+.table-supercondensed > tfoot > tr > td {
+  padding: 0px 5px;
+  border: 0;
 }
