@@ -3,7 +3,8 @@ import decimal
 
 from django.db import models
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import slugify
+
+from slugify import slugify
 
 
 GERMAN_STATES = (
@@ -20,8 +21,8 @@ GERMAN_STATES = (
     ('rheinland-pfalz', u'Rheinland-Pfalz'),
     ('saarland', u'Saarland'),
     ('sachsen', u'Sachsen'),
-    ('sachsenanhalt', u'Sachsen-Anhalt'),
-    ('schleswigholstein', u'Schleswig-Holstein'),
+    ('sachsen-anhalt', u'Sachsen-Anhalt'),
+    ('schleswig-holstein', u'Schleswig-Holstein'),
     ('thueringen', u'Thüringen')
 )
 GERMAN_STATES_DICT = dict(GERMAN_STATES)
@@ -31,6 +32,7 @@ class Organisation(models.Model):
     name = models.CharField(max_length=512)
     slug = models.SlugField()
     sum_fines = models.DecimalField(null=True, decimal_places=2, max_digits=19)
+    note = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
@@ -91,6 +93,7 @@ class FineManager(models.Manager):
             in org_detail_types.items() if row[k]])
 
         fine.filename = row['path']
+        fine.source_file = row['source']
         fine.reference_id = row['id']
 
         fine.city = row['ort']
@@ -123,6 +126,7 @@ class Fine(models.Model):
 
     address = models.TextField(blank=True)
     file_reference = models.CharField(max_length=255, blank=True)
+    source_file = models.CharField(max_length=255, blank=True)
     bank_details = models.TextField(blank=True)
     org_details = models.TextField(blank=True)
     filename = models.CharField(max_length=255)
@@ -132,6 +136,9 @@ class Fine(models.Model):
     postcode = models.CharField(max_length=5, blank=True)
 
     objects = FineManager()
+
+    class Meta:
+        ordering = ('-amount', 'original_name')
 
     def __unicode__(self):
         return self.reference_id
@@ -143,3 +150,9 @@ class Fine(models.Model):
     @property
     def department_label(self):
         return self.DEPARTMENTS_DICT[self.department]
+
+    @property
+    def source_file_extension(self):
+        if self.source_file and '.' in self.source_file:
+            return self.source_file.rsplit('.', 1)[1]
+        return '???'

@@ -32,6 +32,7 @@ class SearchQueryset(QuerySet):
         self.query = query
         self.size = kwargs.pop('size')
         self.default_size = self.size
+        self.kwargs = kwargs
         self.start = 0
         self._total = None
         self._results = None
@@ -41,8 +42,10 @@ class SearchQueryset(QuerySet):
         self._results = self.index.search(
             self.query,
             size=self.size,
-            offset=self.start
+            offset=self.start,
+            **self.kwargs
         )
+        print self._results
         self._total = self._results['total']
         self._result_cache = self._results['results']
 
@@ -95,9 +98,49 @@ class SearchQueryset(QuerySet):
 class GermanIndexAnalysis(object):
     def get_index_analysis(self):
         return {
+            "char_filter": {
+                "german_char_filter": {
+                    "type": "mapping",
+                    "mappings": [ "\\u00DF => ss"]
+                }
+            },
+            "filter": {
+                "german_stop": {
+                    "type": "stop",
+                    "stopwords": "_german_"
+                },
+                "custom_stop": {
+                    "type": "stop",
+                    "stopwords": ["e.V."]
+                },
+                "german_stemmer": {
+                    "type": "stemmer",
+                    "language": "light_german"
+                },
+                'unique_stem': {
+                    'type': 'unique',
+                    'only_on_same_position': True
+                },
+                "decomp": {
+                  "type" : "decompound"
+                }
+            },
             'analyzer': {
-                'text': {
-                    'type': 'german'
+                "german": {
+                    "type": "custom",
+                    "tokenizer":  "standard",
+                    "char_filter": ["german_char_filter"],
+                    "filter": [
+                        "lowercase",
+                        "keyword_repeat",
+                        "german_stop",
+                        "custom_stop",
+                        "word_delimiter",
+                        "decomp",
+                        "german_normalization",
+                        "german_stemmer",
+                        "unique_stem"
+                    ]
                 }
             }
         }

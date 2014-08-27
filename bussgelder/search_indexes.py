@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from elasticsearch import (Elasticsearch, helpers as es_helpers,
                           exceptions as es_exceptions)
 
-from .models import Fine
+from .models import Organisation
 from .search_utils import GermanIndexAnalysis
 
 es_logger = logging.getLogger('elasticsearch')
@@ -59,11 +59,21 @@ class SearchIndex(object):
         action_generator = self.get_document_create_bulk_op
         return es_helpers.bulk(self.es, action_generator())
 
-    def search(self, term, size=10, offset=0):
+    def mlt(self, docid):
+        result = self.es.mlt(
+            index=self.index_name,
+            doc_type=self.name,
+            id=docid
+        )
+        return {
+            'results': [r['_source'] for r in result['hits']['hits']]
+        }
+
+    def search(self, term, filters=None, size=10, offset=0, **kwargs):
         result = self.es.search(
             index=self.index_name,
             doc_type=self.name,
-            body=self.construct_query(term),
+            body=self.construct_query(term, filters=filters, **kwargs),
             size=size,
             from_=offset
         )
@@ -73,6 +83,7 @@ class SearchIndex(object):
         for r in raw_results:
             d = r['_source']
             for key, val in r.get('highlight', {}).items():
+                key = key.replace('.', '_')
                 d[key + '_highlight'] = val[0]
             results.append(d)
 
@@ -82,91 +93,192 @@ class SearchIndex(object):
             'aggregations': result.get('aggregations', {}),
         }
 
+    def construct_query(self, term, filters=None, **kwargs):
+        query = {
+            "query": {
+                "query_string": {
+                    "query": term,
+                    "default_operator": "AND"
+                }
+            }
+        }
+        return query
+
     def get_mapping(self):
-        raise NotImplementedError
+        return {}
 
     def get_index_analysis(self):
-        raise NotImplementedError
+        return {}
 
     def make_document(self, obj):
         raise NotImplementedError
 
 
-class FineIndex(GermanIndexAnalysis, SearchIndex):
+class OrganisationIndex(SearchIndex):
     index_name = 'bussgelder'
-    name = 'fines'
-    model = Fine
-    queryset = model._default_manager.select_related('organisation')
+    name = 'organisations'
+    model = Organisation
+    queryset = model._default_manager.select_related('fines')
     aggregations = ['state']
 
-    def construct_query(self, term):
-        return {
-            "query": {"query_string": {"query": term}},
-            "aggs": {
-                "states": {
-                    "terms": {"field": "state_slug"}
-                },
-                "total_sum": {"sum": {"field": "amount"}}
-            },
-            "highlight": {
-                "pre_tags": ["<span class=\"highlighted\">"],
-                "post_tags": ["</span>"],
-                "fields": {
-                    "text": {}
+    def construct_query(self, term, **kwargs):
+        if not term:
+            query = {
+                "query": {"match_all": {}}
+            }
+        else:
+            query = {
+                "query": {
+                    "bool": {
+                        "should": [{
+                            "multi_match": {
+                                "query": term,
+                                "fields": ["name^2"],
+                                "operator": "AND"
+                            }
+                        }, {
+                            "nested": {
+                                "path": "fines",
+                                "query": {
+                                    "multi_match": {
+                                        "fields": ["name^2", "text"],
+                                        "query": term,
+                                        "operator": "AND"
+                                    }
+                                }
+                            }
+                        }]
+                    }
                 }
-            },
-            "sort": [
-                {
-                    "amount": {
-                        "order": "desc"
+            }
+
+        query.update({
+            "aggs": {
+                "fines": {
+                    "nested": {
+                        "path": "fines"
+                    },
+                    "aggs": {
+                        "states": {
+                            "terms": {
+                                "field": "fines.state",
+                                "size": 0
+                            }
+                        },
+                        "years": {
+                            "terms": {
+                                "field": "fines.year",
+                                "size": 0
+                            }
+                        }
                     }
                 },
-                "_score"
-            ]
-        }
+                "total_sum": {"sum": {"field": "amount"}},
+            },
+            "highlight": {
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"],
+                "fields": {
+                    "fines.text": {}
+                }
+            }
+        })
+        sort = kwargs.get('sort', 'amount:desc')
+        if sort:
+            sort_list = []
+            name, order = sort.split(':')
+            if sort:
+                sort_list.append({
+                    name: {
+                        "order": order
+                    }
+                })
+            sort_list.append("_score")
+            query.update({"sort": sort_list})
+        filters = kwargs.get('filters', {})
+        if filters and any(filters.values()):
+            query.update({
+                'post_filter': {
+                    "nested": {
+                        "path": "fines",
+                        "filter": {
+                            "and": [{
+                                "term": {'fines.' + key: value}
+                            } for key, value in filters.items() if value]
+                        }
+                    }
+                }
+            })
+        print query
+        return query
 
     def get_mapping(cls):
         """Returns an Elasticsearch mapping."""
 
         return {
             'id': {'type': 'integer'},
-            'organisation_slug': {'type': 'string', 'index': 'not_analyzed'},
-            'organisation_name': {
+            'slug': {'type': 'string', 'index': 'not_analyzed'},
+            'name': {
                 "type": "multi_field",
                 "fields": {
-                    "organisation_name": {
+                    "name": {
                         "type": "string",
                         "index": "analyzed",
-                        'index_analyzer': 'text',
-                        'search_analyzer': 'text'
+                        'index_analyzer': 'german',
+                        'search_analyzer': 'german'
                     },
                     "original": {"type": "string",
                                  "index": "not_analyzed"}
                 }
             },
-            'text': {'type': 'string', 'index': 'analyzed',
-                     'index_analyzer': 'text', 'search_analyzer': 'text'},
-            'state_slug': {'type': 'string', 'index': 'not_analyzed', 'store': True},
-            'state_name': {'type': 'string', 'index': 'not_analyzed'},
-            'department': {'type': 'string', 'index': 'not_analyzed'},
-            'department_detail': {'type': 'string', 'index': 'not_analyzed'},
-            'year': {'type': 'integer', 'index': 'not_analyzed', 'store': True},
             'amount': {'type': 'double', 'index': 'not_analyzed', 'store': True},
+            'fines': {
+                "type": "nested",
+                "properties": {
+                    'id': {'type': 'integer'},
+                    'name'
+                    'amount': {'type': 'double', 'index': 'not_analyzed', 'store': True},
+                    'name': {
+                        "type": "multi_field",
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "index": "analyzed",
+                                'index_analyzer': 'german',
+                                'search_analyzer': 'german'
+                            },
+                            "original": {"type": "string",
+                                         "index": "not_analyzed"}
+                        }
+                    },
+                    'state': {'type': 'string', 'index': 'not_analyzed', 'store': True},
+                    'state_name': {'type': 'string', 'index': 'not_analyzed'},
+                    'department': {'type': 'string', 'index': 'not_analyzed'},
+                    'department_detail': {'type': 'string', 'index': 'not_analyzed'},
+                    'year': {'type': 'integer', 'index': 'not_analyzed', 'store': True},
+                    'text': {'type': 'string', 'index': 'analyzed',
+                             'index_analyzer': 'german', 'search_analyzer': 'german'},
+
+                }
+            }
         }
 
     def make_document(self, obj):
         return {
             'id': obj.pk,
-            'organisation_slug': obj.organisation.slug,
-            'organisation_name': obj.organisation.name,
-            'state_slug': obj.state,
-            'state_name': obj.state_label,
-            'department': obj.department,
-            'department_detail': obj.department_detail,
-            'year': obj.year,
-            'amount': obj.amount,
-            'text': render_to_string(
-                'search/indexes/bussgelder/fine_text.txt',
-                {'object': obj}
-            )
+            'slug': obj.slug,
+            'name': obj.name,
+            'amount': obj.sum_fines,
+            'fines': [{
+                'id': f.pk,
+                'state': f.state,
+                'name': f.original_name,
+                'state_name': f.state_label,
+                'department': f.department,
+                'department_detail': f.department_detail,
+                'year': f.year,
+                'amount': f.amount,
+                'text': render_to_string(
+                    'search/indexes/bussgelder/fine_text.txt', {'object': f})
+                } for f in obj.fines.all()]
         }
