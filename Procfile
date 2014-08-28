@@ -1,1 +1,1 @@
-web: gunicorn bussgelder_project.wsgi:application
+web: gunicorn correctiv_apps.wsgi:application

@@ -8,8 +8,7 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
-    url(r'^bussgelder/', include('bussgelder.urls')),
-
+    url(r'^justizgelder/', include('bussgelder.urls')),
     url(r'^admin/', include(admin.site.urls)),
 )
 

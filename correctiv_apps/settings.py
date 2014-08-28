@@ -1,5 +1,5 @@
 """
-Django settings for bussgelder_project project.
+Django settings for correctiv_apps project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -17,7 +17,7 @@ get_env = lambda x, y: os.environ.get(x, y)
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-PROJECT_NAME = 'bussgelder_project'
+PROJECT_NAME = 'correctiv_apps'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
