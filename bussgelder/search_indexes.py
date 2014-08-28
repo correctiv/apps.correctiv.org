@@ -1,4 +1,5 @@
 import logging
+from urlparse import urlparse
 
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -14,7 +15,14 @@ es_logger.addHandler(logging.StreamHandler())
 
 
 def get_es():
-    return Elasticsearch(settings.ELASTICSEARCH_URL)
+    o = urlparse(settings.ELASTICSEARCH_URL)
+    if o.port is None:
+        port = 443 if o.scheme == 'https' else 80
+    else:
+        port = o.port
+    return Elasticsearch([
+        {'host': o.hostname, 'port': port, 'use_ssl': o.scheme == 'https'},
+    ])
 
 
 class SearchIndex(object):
