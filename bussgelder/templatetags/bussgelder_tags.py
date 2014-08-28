@@ -2,6 +2,7 @@ from urllib import urlencode
 from urlparse import urlparse, parse_qsl
 
 from django import template
+from django.template.defaultfilters import floatformat
 from django.contrib.humanize.templatetags.humanize import intcomma
 
 from ..models import GERMAN_STATES_DICT
@@ -15,8 +16,9 @@ def get_state_name(context, key):
 
 def intcomma_floatformat(value, arg):
     val = intcomma(value)
-    if value == round(value):
-        val += ',00'
+    remainder = floatformat(0.0, 2)[1:]
+    if value == round(value) and not val.endswith(remainder):
+        val += remainder
     return val
 
 
