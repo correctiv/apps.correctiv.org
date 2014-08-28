@@ -30,7 +30,7 @@ GERMAN_STATES_DICT = dict(GERMAN_STATES)
 
 class Organisation(models.Model):
     name = models.CharField(max_length=512)
-    slug = models.SlugField()
+    slug = models.SlugField(max_length=255)
     sum_fines = models.DecimalField(null=True, decimal_places=2, max_digits=19)
     note = models.TextField(blank=True)
 
