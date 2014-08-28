@@ -26,7 +26,7 @@ def facet_active(context, name, value):
     value = unicode(value)
     request = context['request']
     d = dict(parse_qsl(urlparse(request.get_full_path()).query))
-    return d.get(name) == value
+    return d.get(name, '') == value
 
 
 def facet_vars(context, name, value):
@@ -35,7 +35,7 @@ def facet_vars(context, name, value):
     d = dict(parse_qsl(urlparse(request.get_full_path()).query))
     d.pop('page', None)
     if name:
-        if d.get(name) == value:
+        if not value or d.get(name) == value:
             d.pop(name)
         else:
             d[name] = value

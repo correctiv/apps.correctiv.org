@@ -149,7 +149,7 @@ class Fine(models.Model):
 
     @property
     def department_label(self):
-        return self.DEPARTMENTS_DICT[self.department]
+        return self.DEPARTMENTS_DICT[self.department] + ' ' + self.department_detail
 
     @property
     def source_file_extension(self):

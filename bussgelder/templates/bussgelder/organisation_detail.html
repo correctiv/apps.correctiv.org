@@ -15,10 +15,12 @@
 <div class="page-header">
   <h2>
     {{ object.name }}
-    <span class="label label-info">
-      {{ object.sum_fines|intcomma }}&nbsp;€
-    </span>
   </h2>
+  <h3>
+    <span class="label label-info">
+      Gesamtsumme: {{ object.sum_fines|intcomma }}&nbsp;€
+    </span>
+  </h3>
 </div>
 
 {% if object.note %}
@@ -41,7 +43,7 @@
       <thead>
         <tr>
           <th>
-            Empfänger Name
+            Name des Empfängers
           </th>
           <th class="text-right">
             Betrag
@@ -50,10 +52,13 @@
             Bundesland
           </th>
           <th>
+            Herkunft
+          </th>
+          <th>
             Quelle
           </th>
           <th>
-            Details
+            Details zum Empfänger
           </th>
         </tr>
       </thead>
@@ -66,6 +71,7 @@
             {{ fine.amount|intcomma_floatformat:2 }}&nbsp;€
           </td>
           <td>{{ fine.state_label }}</td>
+          <td>{{ fine.department_label }}</td>
           <td>
             <a href="{{ MEDIA_URL }}{{ fine.source_file }}">
               {{ fine.source_file_extension|upper }}

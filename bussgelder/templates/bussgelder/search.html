@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load bussgelder_tags %}
 
-{% block title %}Suche {{ query }}{% endblock %}
+{% block title %}Suche{% if query %} "{{ query }}"{% endif %}{% endblock %}
 
 {% block body %}
     {% facet_vars "" "getvars" %}
@@ -37,15 +37,30 @@
             </p>
             <p>
                 Gesamtsumme der Suche:<br/>
-                <strong>{{ result.aggregations.total_sum.value|intcomma }}&nbsp;€</strong>
+                <strong>{{ result.aggregations.filtered_total.total_sum.value|intcomma }}&nbsp;€</strong>
             </p>
             {% if result.aggregations.fines.states %}
                 <h4>Zugewiesen in</h4>
                 <table class="table table-supercondensed">
+                    <tr>
+                        <td class="text-muted text-right">
+                            {{ result.aggregations.fines.doc_count }}
+                        </td>
+                        <td>
+                            {% facet_active "state" "" as facet_is_active %}
+                            {% if facet_is_active %}
+                                Alle
+                            {% else %}
+                                <a href="?{% facet_vars "state" "" %}">
+                                    Alle
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% for facet in result.aggregations.fines.states.buckets|dictsort:"key" %}
                     {% if facet.doc_count %}
                         <tr>
-                            <td class="text-muted">
+                            <td class="text-muted text-right">
                                 {{ facet.doc_count }}
                             </td>
                             <td>
@@ -99,6 +114,21 @@
         <div class="col-lg-9 col-md-8 col-sm-8">
             {% if object_list %}
                 <table class="table">
+                  <thead>
+                    <tr>
+                        <th>
+                            Name der Einrichtung
+                        </th>
+                        <th class="text-right">
+                            Gesamtbetrag
+                        </th>
+                        {% if query %}
+                            <th class="text-muted">
+                            </th>
+                      {% endif %}
+                    </tr>
+                  </thead>
+                  <tbody>
                 {% for result in object_list %}
                     <tr>
                         <td>
@@ -116,11 +146,11 @@
                                 {% endif %}
                             </small>
                         </td>
+                        {% if query %}
                         <td class="text-muted">
-                            {% if query %}
-                                {{ result.fines_text_highlight|safe }}
-                            {% endif %}
+                            {{ result.fines_text_highlight|safe }}
                         </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </table>

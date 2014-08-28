@@ -160,6 +160,36 @@ class OrganisationIndex(SearchIndex):
                 }
             }
 
+        filters = kwargs.get('filters', {})
+        filter_dict = {"match_all": {}}
+        if filters and any(filters.values()):
+            filter_dict = {
+                "nested": {
+                    "path": "fines",
+                    "filter": {
+                        "and": [{
+                            "term": {'fines.' + key: value}
+                        } for key, value in filters.items() if value]
+                    }
+                }
+            }
+            query.update({
+                'post_filter': filter_dict
+            })
+
+        sort = kwargs.get('sort', 'amount:desc')
+        if sort:
+            sort_list = []
+            name, order = sort.split(':')
+            if sort:
+                sort_list.append({
+                    name: {
+                        "order": order
+                    }
+                })
+            sort_list.append("_score")
+            query.update({"sort": sort_list})
+
         query.update({
             "aggs": {
                 "fines": {
@@ -181,7 +211,14 @@ class OrganisationIndex(SearchIndex):
                         }
                     }
                 },
-                "total_sum": {"sum": {"field": "amount"}},
+                "filtered_total": {
+                    "filter": filter_dict,
+                    "aggs": {
+                        "total_sum": {
+                            "sum": {"field": "amount"}
+                        }
+                    }
+                },
             },
             "highlight": {
                 "pre_tags": ["<mark>"],
@@ -191,32 +228,6 @@ class OrganisationIndex(SearchIndex):
                 }
             }
         })
-        sort = kwargs.get('sort', 'amount:desc')
-        if sort:
-            sort_list = []
-            name, order = sort.split(':')
-            if sort:
-                sort_list.append({
-                    name: {
-                        "order": order
-                    }
-                })
-            sort_list.append("_score")
-            query.update({"sort": sort_list})
-        filters = kwargs.get('filters', {})
-        if filters and any(filters.values()):
-            query.update({
-                'post_filter': {
-                    "nested": {
-                        "path": "fines",
-                        "filter": {
-                            "and": [{
-                                "term": {'fines.' + key: value}
-                            } for key, value in filters.items() if value]
-                        }
-                    }
-                }
-            })
         return query
 
     def get_mapping(cls):
