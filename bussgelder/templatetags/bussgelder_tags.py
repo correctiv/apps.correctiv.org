@@ -17,7 +17,10 @@ def get_state_name(context, key):
 def intcomma_floatformat(value, arg):
     val = intcomma(value)
     remainder = floatformat(0.0, 2)[1:]
-    if value == round(value) and not val.endswith(remainder):
+    separator = remainder[0]
+    if unicode(float(value)) == unicode(round(float(value))):
+        if separator in val:
+            val = val.rsplit(separator, 1)[0]
         val += remainder
     return val
 
