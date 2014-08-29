@@ -3,17 +3,18 @@
 {% load humanize %}
 {% load bussgelder_tags %}
 
-{% block title %}Empfänger {{ object.organisation.name }}{% endblock %}
+{% block title %}Empfänger {{ object.name }}{% endblock %}
 
 {% block additional_meta %}
-<meta name="description" content="{{ object.organisation.name }} - {{ object.content }}">
+<meta name="description" content="{{ object.name }} hat {{ object.sum_fines }} Euro an Geldzuwendungen von der Justiz erhalten.">
 
 {% endblock %}
 
 {% block body %}
+<div itemscope itemtype="http://schema.org/Organization">
 
 <div class="page-header">
-  <h2>
+  <h2 itemprop="name">
     {{ object.name }}
   </h2>
   <h3>
@@ -113,9 +114,88 @@
       {% endwith %}
       </tbody>
     </table>
+  </div>
+</div>
+</div>
+    {% if not request.GET.embed %}
+    <div class="row">
+      <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="thumbnail">
+          <div class="caption">
+            <h4 class="text-center">
+              <span class="glyphicon glyphicon-share"></span>
+              Interessante Organisation?
+            </h4>
+            <p>Teilen Sie diese Geld-Zuweisungen:</p>
+            {% url "bussgelder:search" as bussgelder_search %}
+
+            {% with formatted_sum=object.sum_fines|intcomma escaped_name=object.name|urlencode %}
+            {% with sharetext=object.name|add:" hat "|add:formatted_sum|add:" € aus der Justiz bekommen"|urlencode url=SITE_URL|add:bussgelder_search|add:"?q="|add:escaped_name|urlencode %}
+
+            <ul class="list-unstyled">
+              <li>
+                <a href="https://twitter.com/share?text={{ sharetext|add:" %40correctiv_org" }}&amp;url={{ url }}">
+                  <span class="glyphicon glyphicon-share"></span>
+                  Twitter
+                </a>
+              </li>
+              <li>
+                <a href="https://www.facebook.com/sharer.php?u={{ url }}">
+                  <span class="glyphicon glyphicon-share"></span>
+                  Facebook
+                </a>
+              </li>
+              <li>
+                <a href="https://plus.google.com/share?url={{ url }}">
+                  <span class="glyphicon glyphicon-share"></span>
+                  Google+
+                </a>
+              </li>
+            </ul>
+            {% endwith %}{% endwith %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="thumbnail">
+          <div class="caption">
+            <h4 class="text-center">
+              <span class="glyphicon glyphicon-list-alt"></span>
+              Diese Zuweisung einbetten
+            </h4>
+            <p>
+              Wollen Sie diese Zuweisung auf Ihrer Website einbinden?
+              Kopieren Sie diesen iFrame-Code
+            </p>
+            <textarea readonly style="width:100%" rows="4">{% spaceless %}
+              <iframe frameborder="0" width="100%" height="360px" src="{{ SITE_URL }}{{ object.get_absolute_url }}?embed=1"></iframe>
+            {% endspaceless %}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-4 col-sm-12">
+        <div class="thumbnail">
+          <div class="caption">
+            <h4 class="text-center">
+              <span class="glyphicon glyphicon-envelope"></span>
+              Kontaktieren Sie uns!
+            </h4>
+            <p>Ihnen sind <strong>Misstände</strong> bei der Verteilung von Geldzuwendungen durch Richter und Staatsanwälte bekannt? Sie haben Informationen zu Personen oder Einrichtungen, die wir uns <strong>genauer anschauen</strong> sollten?</p>
+            <p>
+              <a href="https://correctiv-upload.org/">
+                <span class="glyphicon glyphicon-arrow-right"></span>
+                Senden Sie uns Nachrichten und Dokumente
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if mlt.results|length > 1 %}
     <hr/>
     <h3>
-      <a href="{% url 'bussgelder_search' %}?q={{ object.name|urlencode }}">
+      <a href="{% url 'bussgelder:search' %}?q={{ object.name|urlencode }}">
         Ähnliche Empfänger
       </a>
     </h3>
@@ -123,13 +203,15 @@
       {% for obj in mlt.results %}
         {% if obj.id != object.id %}
           <li>
-            <a href="{% url 'bussgelder_organisation_detail' slug=obj.slug %}">
+            <a href="{% url 'bussgelder:organisation_detail' slug=obj.slug %}">
               {{ obj.name }}
             </a>
           </li>
         {% endif %}
       {% endfor %}
     </ul>
+    {% endif %}
+    {% endif %}
   </div>
 </div>
 
