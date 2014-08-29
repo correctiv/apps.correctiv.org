@@ -15,6 +15,15 @@ class OrganisationSearchForm(forms.Form):
                 'class': 'form-control',
                 'placeholder': 'Ihre Sucheingabe'
             }))
+
+    amount_gte = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput)
+
+    amount_lte = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput)
+
     state = forms.ChoiceField(
         choices=GERMAN_STATES,
         required=False,
@@ -27,14 +36,13 @@ class OrganisationSearchForm(forms.Form):
         empty_value='',
         widget=forms.HiddenInput)
 
-
     sort = forms.ChoiceField(
         choices=(
             # ('name:asc', 'Name'),
             ('amount:desc', 'Betrag'),
             ('', 'Relevanz')
         ),
-        initial='',
+        initial='amount:desc',
         required=False,
         widget=forms.RadioSelect)
 
@@ -42,12 +50,17 @@ class OrganisationSearchForm(forms.Form):
         'state': 'state',
         'year': 'year'
     }
+    RANGES = (
+        'amount_lte',
+        'amount_gte'
+    )
 
     def _search(self, idx, size, query):
         return SearchQueryset(
             idx,
             query,
             filters=self.get_filters(),
+            ranges=self.get_ranges(),
             sort=self.cleaned_data.get('sort', ''),
             size=size
         )
@@ -60,6 +73,9 @@ class OrganisationSearchForm(forms.Form):
         for key in self.FILTERS:
             filters[self.FILTERS[key]] = self.cleaned_data[key]
         return filters
+
+    def get_ranges(self):
+        return {key: self.cleaned_data[key] for key in self.RANGES}
 
     def search(self, size=None):
         idx = OrganisationIndex()

@@ -161,10 +161,9 @@ class OrganisationIndex(SearchIndex):
             }
 
         filters = kwargs.get('filters', {})
-        filter_dict = {"match_all": {}}
+        filter_list = []
         if filters and any(filters.values()):
-            filter_dict = {
-                "nested": {
+            filter_list.append({"nested": {
                     "path": "fines",
                     "filter": {
                         "and": [{
@@ -172,10 +171,26 @@ class OrganisationIndex(SearchIndex):
                         } for key, value in filters.items() if value]
                     }
                 }
-            }
+            })
+        ranges = kwargs.get('ranges', {})
+        if ranges:
+            range_filter = {}
+            for key, val in ranges.items():
+                if val is None:
+                    continue
+                key, typ = key.rsplit('_', 1)
+                range_filter.setdefault(key, {})
+                range_filter[key][typ] = val
+            filter_list.append({
+                "range": range_filter
+            })
+        if filter_list:
+            filter_dict = {"and": filter_list}
             query.update({
                 'post_filter': filter_dict
             })
+        else:
+            filter_dict = {"match_all": {}}
 
         sort = kwargs.get('sort', 'amount:desc')
         if sort:
@@ -219,6 +234,9 @@ class OrganisationIndex(SearchIndex):
                         }
                     }
                 },
+                "max_amount": {
+                    "max": {"field": "amount"}
+                }
             },
             "highlight": {
                 "pre_tags": ["<mark>"],
