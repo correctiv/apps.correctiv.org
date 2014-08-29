@@ -67,30 +67,24 @@ class FineManager(models.Manager):
         fine.address = row['adresse']
         fine.file_reference = row['aktenzeichen']
 
-        # Bank details
-        bank_detail_types = {
-            'blz': u'BLZ',
-            'kto': u'Kontonummer',
-            'kreditinstitut': u'Kreditinstitut',
-            'bank': u'Bankdetails'
-        }
-        fine.bank_details = u'\n'.join([
-            u'%s: %s' % (v, row[k]) for k, v
-            in bank_detail_types.items() if row[k]])
+        fine.bank_details = u'\n'.join(
+            row[k] for k in (
+                'blz',
+                'kto',
+                'kreditinstitut',
+                'bank',
+            ) if row[k])
 
-        org_detail_types = {
-            'kategorie': u'Kategorie',
-            'notizen': u'Notizen',
-            'rest': u'Weitere Details',
-            'thema': u'Thema',
-            'vorsitzender': u'Vorsitzende(r)',
-            'wirkungskreis': u'Wirkungskreis',
-            'zu_haenden': u'zu Händen'
-        }
-
-        fine.org_details = u'\n'.join([
-            u'%s: %s' % (v, row[k]) for k, v
-            in org_detail_types.items() if row[k]])
+        fine.org_details = u'\n'.join(
+            row[k] for k in (
+                'kategorie',
+                'notizen',
+                'rest',
+                'thema',
+                'vorsitzender',
+                'wirkungskreis',
+                'zu_haenden'
+            ) if row[k])
 
         fine.filename = row['path']
         fine.source_file = row['source']
