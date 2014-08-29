@@ -208,7 +208,7 @@
             $('#id_amount_gte').val("0");
         }
         if ($('#id_amount_lte').val() === '') {
-            $('#id_amount_lte').val(''+max_value)
+            $('#id_amount_lte').val('' + (max_value + 1000));
         }
         $('#amount-range').noUiSlider({
             start: [
