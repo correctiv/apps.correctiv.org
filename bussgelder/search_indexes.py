@@ -181,9 +181,10 @@ class OrganisationIndex(SearchIndex):
                 key, typ = key.rsplit('_', 1)
                 range_filter.setdefault(key, {})
                 range_filter[key][typ] = val
-            filter_list.append({
-                "range": range_filter
-            })
+            if range_filter:
+                filter_list.append({
+                    "range": range_filter
+                })
         if filter_list:
             filter_dict = {"and": filter_list}
             query.update({
