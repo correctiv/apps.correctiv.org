@@ -43,6 +43,8 @@ ALLOWED_HOSTS = [get_env('DJANGO_ALLOWED_HOSTS', '*')]
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -59,6 +61,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -69,7 +72,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages"
+    "django.contrib.messages.context_processors.messages",
+    "correctiv_apps.helpers.context_processors.site_settings"
 )
 
 ROOT_URLCONF = PROJECT_NAME + '.urls'
@@ -109,6 +113,8 @@ STATICFILES_DIRS = (
 )
 
 STATIC_ROOT = os.path.join(BASE_DIR, "public", "static")
+SITE_ID = 1
+SITE_URL = get_env('SITE_URL', 'https://apps.correctiv.org')
 
 MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "files"))
 MEDIA_URL = get_env('MEDIA_URL', '/media/')

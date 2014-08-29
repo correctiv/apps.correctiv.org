@@ -23,6 +23,26 @@
   </h3>
 </div>
 
+{% if not request.GET.embed %}
+  <div class="row">
+    <div class="col-lg-6">
+      <p>
+        <a class="btn btn-default" href="{% url 'bussgelder:search' %}">
+          <span class="glyphicon glyphicon-arrow-left"></span>
+          Zurück zur Suche
+        </a>
+      </p>
+    </div>
+    <div class="col-lg-6">
+      <p class="text-right">
+        <a class="btn btn-default" href="#justizgelder-detail" data-toggle="modal">
+            <span class="glyphicon glyphicon-info-sign"></span>
+            Infos zur Datenbank
+        </a>
+      </p>
+    </div>
+  </div>
+{% endif %}
 {% if object.note %}
   <div class="row">
     <div class="col-lg-8">
