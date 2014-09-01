@@ -8,7 +8,6 @@ from elasticsearch import (Elasticsearch, helpers as es_helpers,
                           exceptions as es_exceptions)
 
 from .models import Organisation
-from .search_utils import GermanIndexAnalysis
 
 es_logger = logging.getLogger('elasticsearch')
 es_logger.addHandler(logging.StreamHandler())
@@ -122,7 +121,7 @@ class SearchIndex(object):
         raise NotImplementedError
 
 
-class OrganisationIndex(GermanIndexAnalysis, SearchIndex):
+class OrganisationIndex(SearchIndex):
     index_name = 'bussgelder'
     name = 'organisations'
     model = Organisation
