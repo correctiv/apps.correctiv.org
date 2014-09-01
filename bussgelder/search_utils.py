@@ -119,15 +119,12 @@ class GermanIndexAnalysis(object):
                 'unique_stem': {
                     'type': 'unique',
                     'only_on_same_position': True
-                },
-                "decomp": {
-                  "type" : "decompound"
                 }
             },
             'analyzer': {
                 "german": {
                     "type": "custom",
-                    "tokenizer":  "standard",
+                    "tokenizer": "standard",
                     "char_filter": ["german_char_filter"],
                     "filter": [
                         "lowercase",
@@ -135,7 +132,6 @@ class GermanIndexAnalysis(object):
                         "german_stop",
                         "custom_stop",
                         "word_delimiter",
-                        "decomp",
                         "german_normalization",
                         "german_stemmer",
                         "unique_stem"

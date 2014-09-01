@@ -122,7 +122,7 @@ class SearchIndex(object):
         raise NotImplementedError
 
 
-class OrganisationIndex(SearchIndex):
+class OrganisationIndex(GermanIndexAnalysis, SearchIndex):
     index_name = 'bussgelder'
     name = 'organisations'
     model = Organisation
