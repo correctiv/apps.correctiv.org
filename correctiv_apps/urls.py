@@ -9,6 +9,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^justizgelder/', include('bussgelder.urls', namespace='bussgelder')),
+    (r'^tinymce/', include('tinymce.urls')),
     url(r'^admin/', include(admin.site.urls)),
 )
 

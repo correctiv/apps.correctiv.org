@@ -51,6 +51,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
+    'tinymce',
+
+    'correctiv_apps.helpers',
+
     'bussgelder',
 )
 
@@ -122,6 +126,12 @@ MEDIA_URL = get_env('MEDIA_URL', '/media/')
 FILE_URL_PREFIX = get_env('FILE_URL_PREFIX', 'http://auskunftsrechturteile.netzwerkrecherche.de/')
 
 ELASTICSEARCH_URL = get_env('BONSAI_URL', 'http://127.0.0.1:9200/')
+
+TINYMCE_DEFAULT_CONFIG = {
+    'plugins': "table,paste,searchreplace",
+    'theme': "advanced",
+    'cleanup_on_startup': True,
+}
 
 try:
     from .local_settings import *  # noqa
