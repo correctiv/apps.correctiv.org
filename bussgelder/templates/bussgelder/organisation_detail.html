@@ -70,6 +70,9 @@
             Bundesland
           </th>
           <th>
+            Jahr
+          </th>
+          <th>
             Herkunft
           </th>
           <th>
@@ -89,6 +92,7 @@
             {{ fine.amount|intcomma_floatformat:2 }}&nbsp;€
           </td>
           <td>{{ fine.state_label }}</td>
+          <td>{{ fine.year }}</td>
           <td>{{ fine.department_label }}</td>
           <td>
             <a href="{{ MEDIA_URL }}{{ fine.source_file }}">
