@@ -14,14 +14,20 @@ def get_state_name(context, key):
     return GERMAN_STATES_DICT.get(key, '')
 
 
+DECIMAL_SEPARATOR = floatformat(0.0, 2)[1]
+
+
 def intcomma_floatformat(value, arg):
     val = intcomma(value)
-    remainder = floatformat(0.0, 2)[1:]
-    separator = remainder[0]
-    if unicode(float(value)) == unicode(round(float(value))):
-        if separator in val:
-            val = val.rsplit(separator, 1)[0]
-        val += remainder
+    if not DECIMAL_SEPARATOR in val:
+        val += '%s00' % DECIMAL_SEPARATOR
+    else:
+        before_comma, after_comma = val.rsplit(DECIMAL_SEPARATOR, 1)
+        if len(after_comma) == 0:
+            after_comma = '00'
+        elif len(after_comma) == 1:
+            after_comma += '0'
+        val = '%s%s%s' % (before_comma, DECIMAL_SEPARATOR, after_comma)
     return val
 
 
