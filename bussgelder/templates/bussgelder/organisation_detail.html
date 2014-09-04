@@ -84,7 +84,7 @@
         </tr>
       </thead>
       <tbody>
-      {% with fines=object.fines.all %}
+      {% with fines=object.fines.all_with_amount %}
         {% for fine in fines %}
         <tr>
           <td>{{ fine.original_name }}</td>

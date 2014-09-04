@@ -128,6 +128,10 @@ class OrganisationIndex(SearchIndex):
     queryset = model._default_manager.select_related('fines')
     aggregations = ['state']
 
+    @property
+    def queryset(self):
+        return self.model._default_manager.exclude(sum_fines=0.0)
+
     def construct_query(self, term, **kwargs):
         if not term:
             query = {
@@ -333,5 +337,5 @@ class OrganisationIndex(SearchIndex):
                 'amount': f.amount,
                 'text': render_to_string(
                     'search/indexes/bussgelder/fine_text.txt', {'object': f})
-                } for f in obj.fines.all()]
+                } for f in obj.fines.exclude(amount=0.0)]
         }

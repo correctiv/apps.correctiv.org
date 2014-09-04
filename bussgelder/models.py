@@ -42,6 +42,9 @@ class Organisation(models.Model):
 
 
 class FineManager(models.Manager):
+    def all_with_amount(self):
+        return self.get_queryset().exclude(amount=0.0)
+
     def create_from_row(self, row, fine=None):
         if fine is None:
             fine = Fine()
