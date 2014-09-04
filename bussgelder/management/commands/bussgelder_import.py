@@ -3,9 +3,8 @@ import unicodecsv
 from django.core.management.base import BaseCommand
 from django.utils import translation
 from django.conf import settings
-from django.db.models import Sum
 
-from ...models import Fine, Organisation
+from ...models import Fine
 
 BULK_SIZE = 500
 
@@ -40,6 +39,7 @@ class Command(BaseCommand):
             yield Fine.objects.create_from_row(row, fine=fine)
 
     def create_aggregates(self):
-        for org in Organisation.objects.annotate(sum_of_fines=Sum('fines__amount')).iterator():
-            org.sum_fines = org.sum_of_fines
-            org.save()
+        from django.db import connection
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE bussgelder_organisation SET sum_fines=(SELECT SUM(bussgelder_fine.amount) FROM bussgelder_fine WHERE bussgelder_fine.organisation_id=bussgelder_organisation.id);")
