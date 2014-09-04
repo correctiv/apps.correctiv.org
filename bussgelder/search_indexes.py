@@ -161,19 +161,22 @@ class OrganisationIndex(SearchIndex):
 
         filters = kwargs.get('filters', {})
         filter_list = []
+        non_nested_filters = []
         if filters and any(filters.values()):
+            current_filters = {
+                "and": [{
+                    "term": {'fines.' + key: value}
+                } for key, value in filters.items() if value]
+            }
+            non_nested_filters.append(current_filters)
             filter_list.append({"nested": {
                     "path": "fines",
-                    "filter": {
-                        "and": [{
-                            "term": {'fines.' + key: value}
-                        } for key, value in filters.items() if value]
-                    }
+                    "filter": current_filters
                 }
             })
         ranges = kwargs.get('ranges', {})
+        range_filter = {}
         if ranges:
-            range_filter = {}
             for key, val in ranges.items():
                 if val is None:
                     continue
@@ -181,9 +184,10 @@ class OrganisationIndex(SearchIndex):
                 range_filter.setdefault(key, {})
                 range_filter[key][typ] = val
             if range_filter:
-                filter_list.append({
-                    "range": range_filter
-                })
+                range_filter = {"range": range_filter}
+                filter_list.append(range_filter)
+            else:
+                range_filter = {'match_all': {}}
         if filter_list:
             filter_dict = {"and": filter_list}
             query.update({
@@ -191,6 +195,11 @@ class OrganisationIndex(SearchIndex):
             })
         else:
             filter_dict = {"match_all": {}}
+
+        if non_nested_filters:
+            non_nested_filters = {"and": non_nested_filters}
+        else:
+            non_nested_filters = {"match_all": {}}
 
         sort = kwargs.get('sort', 'amount:desc')
         if sort:
@@ -205,39 +214,47 @@ class OrganisationIndex(SearchIndex):
             sort_list.append("_score")
             query.update({"sort": sort_list})
 
-        query.update({
-            "aggs": {
-                "fines": {
-                    "nested": {
-                        "path": "fines"
+        if kwargs.get('aggregations', True):
+            query.update({
+                "aggs": {
+                    "amount_filtered": {
+                        "filter": range_filter,
+                        "aggs": {
+                            "fines": {
+                                "nested": {
+                                    "path": "fines"
+                                },
+                                "aggs": {
+                                    "states": {
+                                        "terms": {
+                                            "field": "fines.state",
+                                            "size": 0
+                                        }
+                                    },
+                                    "years": {
+                                        "terms": {
+                                            "field": "fines.year",
+                                            "size": 0
+                                        }
+                                    },
+                                    "filtered_total": {
+                                        "filter": non_nested_filters,
+                                        "aggs": {
+                                            "total_sum": {
+                                                "sum": {"field": "fines.amount"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
-                    "aggs": {
-                        "states": {
-                            "terms": {
-                                "field": "fines.state",
-                                "size": 0
-                            }
-                        },
-                        "years": {
-                            "terms": {
-                                "field": "fines.year",
-                                "size": 0
-                            }
-                        }
+                    "max_amount": {
+                        "max": {"field": "amount"}
                     }
-                },
-                "filtered_total": {
-                    "filter": filter_dict,
-                    "aggs": {
-                        "total_sum": {
-                            "sum": {"field": "amount"}
-                        }
-                    }
-                },
-                "max_amount": {
-                    "max": {"field": "amount"}
                 }
-            },
+            })
+        query.update({
             "highlight": {
                 "pre_tags": ["<mark>"],
                 "post_tags": ["</mark>"],

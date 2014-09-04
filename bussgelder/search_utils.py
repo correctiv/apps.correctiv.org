@@ -27,10 +27,12 @@ class SearchPaginator(Paginator):
 
 
 class SearchQueryset(QuerySet):
+    DEFAULT_SIZE = 15
+
     def __init__(self, index, query, **kwargs):
         self.index = index
         self.query = query
-        self.size = kwargs.pop('size')
+        self.size = kwargs.pop('size', self.DEFAULT_SIZE)
         self.default_size = self.size
         self.kwargs = kwargs
         self.start = 0
@@ -100,7 +102,7 @@ class GermanIndexAnalysis(object):
             "char_filter": {
                 "german_char_filter": {
                     "type": "mapping",
-                    "mappings": [ "\\u00DF => ss"]
+                    "mappings": ["\\u00DF => ss"]
                 }
             },
             "filter": {

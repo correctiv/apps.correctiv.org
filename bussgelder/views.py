@@ -30,5 +30,8 @@ class OrganisationDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(OrganisationDetail, self).get_context_data(**kwargs)
         idx = OrganisationIndex()
-        context['mlt'] = idx.search(self.object.name, size=15, sort=False)
+        context['mlt'] = idx.search(self.object.name,
+                size=15, sort=False,
+                aggregations=False
+        )
         return context

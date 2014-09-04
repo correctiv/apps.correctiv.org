@@ -30,7 +30,11 @@ class OrganisationSearchForm(forms.Form):
         widget=forms.HiddenInput)
 
     year = forms.TypedChoiceField(
-        choices=((2013, '2013'),),
+        choices=(
+            (2011, '2011'),
+            (2012, '2012'),
+            (2013, '2013')
+        ),
         required=False,
         coerce=int,
         empty_value='',
@@ -79,9 +83,8 @@ class OrganisationSearchForm(forms.Form):
 
     def search(self, size=None):
         idx = OrganisationIndex()
-
         if not self.is_valid():
-            return self.no_query_found(idx, size)
+            return SearchQueryset(idx, '')
 
         if not self.cleaned_data.get('q'):
             return self.no_query_found(idx, size)
