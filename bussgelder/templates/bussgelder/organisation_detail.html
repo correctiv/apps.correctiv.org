@@ -73,7 +73,7 @@
             Jahr
           </th>
           <th>
-            Herkunft
+            Justizbezirk
           </th>
           <th>
             Quelle
@@ -110,12 +110,6 @@
             {% if fine.address %}
               {{ fine.address|linebreaksbr }}<br/>
             {% endif %}
-            {% if fine.org_details %}
-              {{ fine.org_details|linebreaksbr }}<br/>
-            {% endif %}
-            {% if fine.bank_details %}
-              {{ fine.bank_details|linebreaksbr }}
-            {% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -126,16 +120,6 @@
 </div>
 </div>
     {% if not request.GET.embed %}
-        {% url "bussgelder:search" as bussgelder_search %}
-
-        {% with formatted_sum=object.sum_fines|intcomma escaped_name=object.name|urlencode %}
-        {% with sharetext=object.name|add:" hat "|add:formatted_sum|add:" € aus der Justiz bekommen"|urlencode url=SITE_URL|add:bussgelder_search|add:"?q="|add:escaped_name|urlencode %}
-
-        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:object.get_absolute_url|add:"?embed=1" %}
-
-        {% endwith %}
-        {% endwith %}
-
 
     {% if mlt.results|length > 1 %}
     <hr/>
@@ -156,6 +140,17 @@
       {% endfor %}
     </ul>
     {% endif %}
+    <hr/>
+        {% url "bussgelder:search" as bussgelder_search %}
+
+        {% with formatted_sum=object.sum_fines|intcomma escaped_name=object.name|urlencode %}
+        {% with sharetext=object.name|add:" hat "|add:formatted_sum|add:" € aus der Justiz bekommen"|urlencode url=SITE_URL|add:bussgelder_search|add:"?q="|add:escaped_name|urlencode %}
+
+        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:object.get_absolute_url|add:"?embed=1" %}
+
+        {% endwith %}
+        {% endwith %}
+
     {% endif %}
   </div>
 </div>

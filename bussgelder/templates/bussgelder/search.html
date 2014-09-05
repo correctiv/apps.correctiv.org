@@ -1,8 +1,14 @@
 {% extends base_template %}
 
+{% load humanize %}
 {% load bussgelder_tags %}
 
 {% block object_list %}
+    <p>
+        {% if query %}„<mark>{{ query }}</mark>“ ergab{% endif %}
+        <strong>{{ page_obj.paginator.count|intcomma }} Treffer</strong> mit insgesamt
+        <strong>{{ result.aggregations.amount_filtered.fines.filtered_total.total_sum.value|intcomma_floatformat:2 }}&nbsp;€</strong>
+    </p>
     {% if object_list %}
         <table class="table">
           <thead>
