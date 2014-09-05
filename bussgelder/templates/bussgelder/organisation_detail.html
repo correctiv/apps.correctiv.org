@@ -97,7 +97,7 @@
           <td>
             {% with source_file=fine.source_file_url %}
               {% if source_file %}
-                <a href="{{ MEDIA_URL }}{{ source_file }}">
+                <a href="{{ MEDIA_URL }}{{ source_file }}" target="_blank">
                   {{ fine.source_file_extension|upper }}
                 </a>
               {% endif %}
@@ -126,82 +126,16 @@
 </div>
 </div>
     {% if not request.GET.embed %}
-    <div class="row">
-      <div class="col-lg-4 col-md-4 col-sm-6">
-        <div class="thumbnail">
-          <div class="caption">
-            <h4 class="text-center">
-              <span class="glyphicon glyphicon-share"></span>
-              Interessante Organisation?
-            </h4>
-            <p>Teilen Sie diese Geld-Zuweisungen:</p>
-            {% url "bussgelder:search" as bussgelder_search %}
+        {% url "bussgelder:search" as bussgelder_search %}
 
-            {% with formatted_sum=object.sum_fines|intcomma escaped_name=object.name|urlencode %}
-            {% with sharetext=object.name|add:" hat "|add:formatted_sum|add:" € aus der Justiz bekommen"|urlencode url=SITE_URL|add:bussgelder_search|add:"?q="|add:escaped_name|urlencode %}
+        {% with formatted_sum=object.sum_fines|intcomma escaped_name=object.name|urlencode %}
+        {% with sharetext=object.name|add:" hat "|add:formatted_sum|add:" € aus der Justiz bekommen"|urlencode url=SITE_URL|add:bussgelder_search|add:"?q="|add:escaped_name|urlencode %}
 
-            <ul class="list-unstyled">
-              <li>
-                <a href="https://twitter.com/share?text={{ sharetext|add:" %40correctiv_org" }}&amp;url={{ url }}">
-                  <span class="glyphicon glyphicon-share"></span>
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a href="https://www.facebook.com/sharer.php?u={{ url }}">
-                  <span class="glyphicon glyphicon-share"></span>
-                  Facebook
-                </a>
-              </li>
-              <li>
-                <a href="https://plus.google.com/share?url={{ url }}">
-                  <span class="glyphicon glyphicon-share"></span>
-                  Google+
-                </a>
-              </li>
-            </ul>
-            {% endwith %}{% endwith %}
-            <p>
-              Folgen Sie uns auf <a href="https://twitter.com/correctiv_org">Twitter!</a>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-4 col-sm-6">
-        <div class="thumbnail">
-          <div class="caption">
-            <h4 class="text-center">
-              <span class="glyphicon glyphicon-list-alt"></span>
-              Diese Zuweisung einbetten
-            </h4>
-            <p>
-              Wollen Sie diese Zuweisung auf Ihrer Website einbinden?
-              Kopieren Sie diesen iFrame-Code
-            </p>
-            <textarea readonly style="width:100%" rows="4">{% spaceless %}
-              <iframe frameborder="0" width="100%" height="360px" src="{{ SITE_URL }}{{ object.get_absolute_url }}?embed=1"></iframe>
-            {% endspaceless %}</textarea>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="thumbnail">
-          <div class="caption">
-            <h4 class="text-center">
-              <span class="glyphicon glyphicon-envelope"></span>
-              Kontaktieren Sie uns!
-            </h4>
-            <p>Ihnen sind <strong>Misstände</strong> bei der Verteilung von Geldzuwendungen durch Richter und Staatsanwälte bekannt? Sie haben Informationen zu Personen oder Einrichtungen, die wir uns <strong>genauer anschauen</strong> sollten?</p>
-            <p>
-              <a href="https://correctiv-upload.org/">
-                <span class="glyphicon glyphicon-arrow-right"></span>
-                Senden Sie uns Nachrichten und Dokumente
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:object.get_absolute_url|add:"?embed=1" %}
+
+        {% endwith %}
+        {% endwith %}
+
 
     {% if mlt.results|length > 1 %}
     <hr/>

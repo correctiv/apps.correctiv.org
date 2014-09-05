@@ -21,6 +21,9 @@ class OrganisationSearchView(ListView):
         context['result'] = self.result
         context['query'] = self.request.GET.get('q')
         context['form'] = self.form
+        context['base_template'] = 'bussgelder/search_base.html'
+        if self.request.GET.get('embed'):
+            context['base_template'] = 'bussgelder/embed_base.html'
         return context
 
 

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% load bussgelder_tags %}
+
+{% block body %}
+  {% facet_vars "" "getvars" %}
+  {% block object_list %}{% endblock %}
+{% endblock %}

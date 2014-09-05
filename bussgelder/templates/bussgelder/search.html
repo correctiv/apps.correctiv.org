@@ -1,260 +1,47 @@
-{% extends 'bussgelder/base.html' %}
+{% extends base_template %}
 
-{% load humanize %}
 {% load bussgelder_tags %}
 
-{% block title %}Suche{% if query %} "{{ query }}"{% endif %}{% endblock %}
-
-{% block extra_style %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery.nouislider.css"/>
-    <style type="text/css">
-    .noUi-connect {
-      background: #428bca;
-    }
-    .noUi-horizontal .noUi-handle {
-        height: 22px;
-        top: -3px;
-    }
-    .noUi-handle:before, .noUi-handle:after {
-        height: 12px;
-        top: 4px;
-    }
-    </style>
-{% endblock %}
-
-{% block body %}
-    {% facet_vars "" "getvars" %}
-    <div class="row">
-        <div class="col-lg-8 col-lg-offset-3">
-            <h2>Suche nach Zuwendungsempfängern</h2>
-            <form method="get" action="?{{ getvars }}">
-                {{ form.amount_gte }}
-                {{ form.amount_lte }}
-                {{ form.state }}
-                <div class="input-group">
-                    {{ form.q }}
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="submit">Suchen</button>
-                    </span>
-                </div><!-- /input-group -->
-                <div class="pull-right">
-                    <p>
-                    Sortiere nach:
-                    {% for radio in form.sort %}
-                        <label class="radio-inline">
-                            {{ radio }}
-                        </label>
-                    {% endfor %}
-                    </p>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="row" style="margin-top: 2em">
-        <div class="col-lg-3 col-md-4 col-sm-4">
-            <p>
-                <strong>{{ page_obj.paginator.count|intcomma }}</strong> Organisationen
-            </p>
-            <p>
-                Gesamtsumme der Suche:<br/>
-                <strong>{{ result.aggregations.amount_filtered.fines.filtered_total.total_sum.value|intcomma }}&nbsp;€</strong>
-            </p>
-            <div class="row">
-                <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 col-xs-offset-1">
-                    <div id="amount-range"></div>
-                    <div class="row">
-                        <div class="col-lg-6 col-xs-6">
-                            <p class="text-left text-muted" id="amount_gte_label">0</p>
-                        </div>
-                        <div class="col-xs-6">
-                            <p class="text-right text-muted" id="amount_lte_label">
-                                {{ result.aggregations.max_amount.value|floatformat:0 }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {% if result.aggregations.amount_filtered.fines.states %}
-                <h4>Zugewiesen in</h4>
-                <table class="table table-supercondensed">
-                    <tr>
-                        <td class="text-muted text-right" style="width:20%">
-                            {{ result.aggregations.amount_filtered.fines.doc_count|intcomma }}
-                        </td>
-                        <td>
-                            {% facet_active "state" "" as facet_is_active %}
-                            {% if facet_is_active %}
-                                Alle
-                            {% else %}
-                                <a href="?{% facet_vars "state" "" %}">
-                                    Alle
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% for facet in result.aggregations.amount_filtered.fines.states.buckets|dictsort:"key" %}
-                    {% if facet.doc_count %}
-                        <tr>
-                            <td class="text-muted text-right">
-                                {{ facet.doc_count|intcomma }}
-                            </td>
-                            <td>
-                                {% facet_active "state" facet.key as facet_is_active %}
-                                {% if facet_is_active %}
-                                    {% get_state_name facet.key %}
-                                    <a href="?{% facet_vars "state" facet.key %}">
-                                        <span class="glyphicon glyphicon-remove"></span>
-                                    </a>
-                                {% else %}
-                                    <a href="?{% facet_vars "state" facet.key %}">
-                                        {% get_state_name facet.key %}
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-                </table>
-            {% endif %}
-            {% if result.aggregations.amount_filtered.fines.years %}
-                <h4>Aus dem Jahr</h4>
-                <table class="table table-supercondensed">
-                    <tr>
-                        <td class="text-muted text-right" style="width:20%">
-                            {{ result.aggregations.amount_filtered.fines.doc_count|intcomma }}
-                        </td>
-                        <td>
-                            {% facet_active "year" "" as facet_is_active %}
-                            {% if facet_is_active %}
-                                Alle
-                            {% else %}
-                                <a href="?{% facet_vars "year" "" %}">
-                                    Alle
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% for facet in result.aggregations.amount_filtered.fines.years.buckets|dictsort:"key" %}
-                    {% if facet.doc_count %}
-                        <tr>
-                            <td class="text-muted text-right">
-                                {{ facet.doc_count|intcomma }}
-                            </td>
-                            <td class="text-left">
-                                {% facet_active "year" facet.key as facet_is_active %}
-                                {% if facet_is_active %}
-                                    {{ facet.key }}
-                                    <a href="?{% facet_vars "year" facet.key %}">
-                                        <span class="glyphicon glyphicon-remove"></span>
-                                    </a>
-                                {% else %}
-                                    <a href="?{% facet_vars "year" facet.key %}">
-                                        {{ facet.key }}
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-                </table>
-            {% endif %}
-            <p>
-                <a class="btn btn-default" href="#justizgelder-detail" data-toggle="modal">
-                    <span class="glyphicon glyphicon-info-sign"></span>
-                    Infos zur Datenbank
-                </a>
-            </p>
-        </div>
-        <div class="col-lg-9 col-md-8 col-sm-8">
-            {% if object_list %}
-                <table class="table">
-                  <thead>
-                    <tr>
-                        <th>
-                            Name der Einrichtung
-                        </th>
-                        <th class="text-right">
-                            Gesamtbetrag
-                        </th>
-                        {% if query %}
-                            <th class="text-muted">
-                            </th>
-                      {% endif %}
-                    </tr>
-                  </thead>
-                  <tbody>
-                {% for result in object_list %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'bussgelder:organisation_detail' slug=result.slug %}">
-                                {{ result.name }}
-                            </a>
-                        </td>
-                        <td class="text-right" title="{{ result.fines|length }} dokumentierte Erfassunge(n)">
-                            {{ result.amount|intcomma_floatformat:2 }}&nbsp;€
-                        </td>
-                        {% if query %}
-                        <td class="text-muted">
-                            {{ result.fines_text_highlight|safe }}
-                        </td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-                </table>
-                {% if is_paginated %}
-                    {% include "pagination.html" with page_obj=page_obj getvars="&"|add:getvars %}
+{% block object_list %}
+    {% if object_list %}
+        <table class="table">
+          <thead>
+            <tr>
+                <th>
+                    Name der Einrichtung
+                </th>
+                <th class="text-right">
+                    Gesamtbetrag
+                </th>
+                {% if query %}
+                    <th class="text-muted">
+                    </th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+        {% for result in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'bussgelder:organisation_detail' slug=result.slug %}">
+                        {{ result.name }}
+                    </a>
+                </td>
+                <td class="text-right" title="{{ result.fines|length }} dokumentierte Erfassunge(n)">
+                    {{ result.amount|intcomma_floatformat:2 }}&nbsp;€
+                </td>
+                {% if query %}
+                <td class="text-muted">
+                    {{ result.fines_text_highlight|safe }}
+                </td>
                 {% endif %}
-            {% else %}
-                <p>Keine Ergebnisse gefunden</p>
-            {% endif %}
-        </div>
-    </div>
-{% endblock %}
-
-{% block scripts %}
-    {{ block.super }}
-    <script src="{{ STATIC_URL }}js/jquery.nouislider.min.js"></script>
-    <script>
-    (function(){
-        var max_value = {{ result.aggregations.max_amount.value|floatformat:0 }};
-        if ($('#id_amount_gte').val() === '') {
-            $('#id_amount_gte').val("0");
-        }
-        if ($('#id_amount_lte').val() === '') {
-            $('#id_amount_lte').val('' + (max_value + 1000));
-        }
-        $('#amount-range').noUiSlider({
-            start: [
-                parseInt($('#id_amount_gte').val(), 10),
-                parseInt($('#id_amount_lte').val(), 10)
-            ],
-            range: {
-                'min': [ 0 ],
-                '0%': [ 0, 100 ],
-                '20%': [ 11000, 500 ],
-                '50%': [ 100000, 1000 ],
-                'max': [ max_value + 1000 ]
-            },
-            connect: true
-        }).change(function(){
-            var val = $(this).val();
-            val[0] = Math.floor(parseInt(val[0], 10) / 1000) * 1000;
-            val[1] = Math.floor(parseInt(val[1], 10) / 1000) * 1000;
-            $('#id_amount_gte').val(val[0]);
-            $('#id_amount_lte').val(val[1]);
-            $('#id_amount_lte').parent('form').submit();
-        }).on('slide', function(){
-            var val = $(this).val();
-            val[0] = Math.floor(parseInt(val[0], 10) / 1000);
-            val[1] = Math.floor(parseInt(val[1], 10) / 1000);
-            $('#amount_gte_label').text(val[0] + ' T€');
-            $('#amount_lte_label').text(val[1] + ' T€');
-        }).trigger('slide');
-        $('.radio-inline').click(function(){
-            $(this).parents('form').submit();
-        })
-    }());
-    </script>
+            </tr>
+        {% endfor %}
+        </table>
+        {% if is_paginated %}
+            {% include "pagination.html" with page_obj=page_obj getvars="&"|add:getvars %}
+        {% endif %}
+    {% else %}
+        <p>Keine Ergebnisse gefunden</p>
+    {% endif %}
 {% endblock %}
