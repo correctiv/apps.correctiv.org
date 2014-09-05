@@ -135,7 +135,7 @@ class Fine(models.Model):
     objects = FineManager()
 
     class Meta:
-        ordering = ('-amount', 'original_name')
+        ordering = ('-year', 'state', '-amount')
 
     def __unicode__(self):
         return self.reference_id
