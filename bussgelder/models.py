@@ -153,3 +153,9 @@ class Fine(models.Model):
         if self.source_file and '.' in self.source_file:
             return self.source_file.rsplit('.', 1)[1]
         return '???'
+
+    @property
+    def source_file_url(self):
+        if not self.source_file.rsplit('/', 1)[1].startswith('_'):
+            return 'justizgelder/' + self.source_file
+        return False

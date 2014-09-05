@@ -95,9 +95,13 @@
           <td>{{ fine.year }}</td>
           <td>{{ fine.department_label }}</td>
           <td>
-            <a href="{{ MEDIA_URL }}{{ fine.source_file }}">
-              {{ fine.source_file_extension|upper }}
-            </a>
+            {% with source_file=fine.source_file_url %}
+              {% if source_file %}
+                <a href="{{ MEDIA_URL }}{{ source_file }}">
+                  {{ fine.source_file_extension|upper }}
+                </a>
+              {% endif %}
+            {% endwith %}
           </td>
           <td class="text-muted">
             {% if fine.city or fine.postcode %}
