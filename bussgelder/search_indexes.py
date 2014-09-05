@@ -140,25 +140,16 @@ class OrganisationIndex(SearchIndex):
         else:
             query = {
                 "query": {
-                    "bool": {
-                        "should": [{
-                            "multi_match": {
+                    "nested": {
+                        "path": "fines",
+                        "query": {
+                            "query_string": {
+                                "fields": ["name^2", "text"],
                                 "query": term,
-                                "fields": ["name^2"],
-                                "operator": "AND"
+                                "default_operator": "AND",
+                                "lenient": True
                             }
-                        }, {
-                            "nested": {
-                                "path": "fines",
-                                "query": {
-                                    "multi_match": {
-                                        "fields": ["name^2", "text"],
-                                        "query": term,
-                                        "operator": "AND"
-                                    }
-                                }
-                            }
-                        }]
+                        }
                     }
                 }
             }
