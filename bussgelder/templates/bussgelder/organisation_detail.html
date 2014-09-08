@@ -79,7 +79,7 @@
             Quelle
           </th>
           <th>
-            Details zum Empfänger
+            Details
           </th>
         </tr>
       </thead>
@@ -87,7 +87,9 @@
       {% with fines=object.fines.all_with_amount %}
         {% for fine in fines %}
         <tr>
-          <td>{{ fine.original_name }}</td>
+          <td>
+            {{ fine.original_name }}
+          </td>
           <td class="text-right">
             {{ fine.amount|intcomma_floatformat:2 }}&nbsp;€
           </td>
@@ -104,6 +106,11 @@
             {% endwith %}
           </td>
           <td class="text-muted">
+            {% if fine.note %}
+              <p>
+                <a href="#" class="note" data-toggle="popover" title="Anmerkung" data-content="{{ fine.note }}">Anmerkung</a>
+              </p>
+            {% endif %}
             {% if fine.city or fine.postcode %}
               {{ fine.city }} {{ fine.postcode }}<br/>
             {% endif %}
@@ -155,4 +162,11 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+    $('.note').popover({placement: 'bottom'});
+  </script>
 {% endblock %}
