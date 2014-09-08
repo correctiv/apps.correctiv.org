@@ -90,6 +90,7 @@ class FineManager(models.Manager):
             ) if row[k])
 
         fine.filename = row['path']
+        fine.note = row['anmerkungen']
         fine.source_file = row['source']
         fine.reference_id = row['id']
 
@@ -127,7 +128,9 @@ class Fine(models.Model):
     bank_details = models.TextField(blank=True)
     org_details = models.TextField(blank=True)
     filename = models.CharField(max_length=255)
-    reference_id = models.CharField(max_length=255, db_index=True)
+    reference_id = models.CharField(max_length=255)
+
+    note = models.TextField(blank=True)
 
     city = models.CharField(max_length=255, blank=True)
     postcode = models.CharField(max_length=5, blank=True)
