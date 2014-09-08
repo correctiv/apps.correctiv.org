@@ -36,7 +36,8 @@
     </div>
     <div class="col-lg-6 col-xs-6">
       <p class="text-right">
-        <a class="btn btn-default" href="#justizgelder-detail" data-toggle="modal">
+        {# Ouch, duplicated hardcoded flatpage URL #}
+        <a class="btn btn-default js-info-modal" href="/justizgelder/details/" data-target="#justizgelder-detail">
             <span class="glyphicon glyphicon-info-sign"></span>
             Infos zur Datenbank
         </a>
@@ -168,5 +169,14 @@
   {{ block.super }}
   <script>
     $('.note').popover({placement: 'bottom'});
+    $('.js-info-modal').click(function(e){
+        if (e.ctrlKey || e.metaKey) {
+            return;
+        }
+        e.preventDefault();
+        $($(this).data('target')).modal({
+          path: false
+        });
+    });
   </script>
 {% endblock %}

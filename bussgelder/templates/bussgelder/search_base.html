@@ -156,7 +156,8 @@
                 </table>
             {% endif %}
             <p>
-                <a class="btn btn-default" href="#justizgelder-detail" data-toggle="modal">
+                {# Ouch, hardcoded flatpage URL #}
+                <a class="btn btn-default js-info-modal" href="/justizgelder/details/" data-target="#justizgelder-detail">
                     <span class="glyphicon glyphicon-info-sign"></span>
                     Infos zur Datenbank
                 </a>
@@ -221,7 +222,16 @@
         }).trigger('slide');
         $('.radio-inline').click(function(){
             $(this).parents('form').submit();
-        })
+        });
+        $('.js-info-modal').click(function(e){
+            if (e.ctrlKey || e.metaKey) {
+                return;
+            }
+            e.preventDefault();
+            $($(this).data('target')).modal({
+              path: false
+            });
+        });
     }());
     </script>
 {% endblock %}
