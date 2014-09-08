@@ -172,7 +172,7 @@
         {% with formatted_sum=result.aggregations.amount_filtered.fines.filtered_total.total_sum.value|intcomma escaped_name=object.name|urlencode %}
         {% with sharetext="Diese Einrichtungen haben "|add:formatted_sum|add:" € von der Justiz bekommen:"|urlencode url=SITE_URL|add:bussgelder_search %}
 
-        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:bussgelder_search|add:"&embed=1" %}
+        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:bussgelder_search|add_embed %}
 
         {% endwith %}
         {% endwith %}

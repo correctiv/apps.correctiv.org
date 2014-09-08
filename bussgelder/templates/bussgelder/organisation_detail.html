@@ -146,7 +146,7 @@
         {% with formatted_sum=object.sum_fines|intcomma escaped_name=object.name|urlencode %}
         {% with sharetext=object.name|add:" hat "|add:formatted_sum|add:" € aus der Justiz bekommen"|urlencode url=SITE_URL|add:bussgelder_search|add:"?q="|add:escaped_name|urlencode %}
 
-        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:object.get_absolute_url|add:"?embed=1" %}
+        {% include "bussgelder/_action_area.html" with sharetext=sharetext url=url embed_url=SITE_URL|add:object.get_absolute_url|add_embed %}
 
         {% endwith %}
         {% endwith %}

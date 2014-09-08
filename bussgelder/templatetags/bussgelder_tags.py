@@ -1,5 +1,5 @@
 from urllib import urlencode
-from urlparse import urlparse, parse_qsl
+from urlparse import urlparse, urlsplit, urlunsplit, parse_qs
 
 from django import template
 from django.template.defaultfilters import floatformat
@@ -15,6 +15,14 @@ def get_state_name(context, key):
 
 
 DECIMAL_SEPARATOR = floatformat(0.0, 2)[1]
+
+
+def add_embed(url):
+    (scheme, netloc, path, query, fragment) = urlsplit(url)
+    d = parse_qs(query)
+    d['embed'] = '1'
+    query = urlencode(d, True)
+    return urlunsplit((scheme, netloc, path, query, fragment))
 
 
 def intcomma_floatformat(value, arg):
@@ -34,14 +42,15 @@ def intcomma_floatformat(value, arg):
 def facet_active(context, name, value):
     value = unicode(value)
     request = context['request']
-    d = dict(parse_qsl(urlparse(request.get_full_path()).query))
+    d = parse_qs(urlparse(request.get_full_path()).query)
     return d.get(name, '') == value
 
 
 def facet_vars(context, name, value):
     value = unicode(value)
     request = context['request']
-    d = dict(parse_qsl(urlparse(request.get_full_path()).query))
+    (scheme, netloc, path, query, fragment) = urlsplit(request.get_full_path())
+    d = parse_qs(query)
     d.pop('page', None)
     if name:
         if not value or d.get(name) == value:
@@ -49,8 +58,7 @@ def facet_vars(context, name, value):
         else:
             d[name] = value
 
-    out = urlencode([
-        (k.encode('utf-8'), v.encode('latin1')) for k, v in d.items()])
+    out = urlencode(d, True)
     if name:
         return out
     else:
@@ -62,3 +70,4 @@ register.simple_tag(takes_context=True)(get_state_name)
 register.simple_tag(takes_context=True)(facet_vars)
 register.assignment_tag(takes_context=True)(facet_active)
 register.filter('intcomma_floatformat', intcomma_floatformat)
+register.filter('add_embed', add_embed)
