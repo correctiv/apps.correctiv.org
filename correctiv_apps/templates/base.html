@@ -25,12 +25,27 @@
 <body>
   {% block base_body %}
     <div class="main container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="pull-right">
+          <a href="https://www.correctiv.org/">
+            <img src="{{ STATIC_URL }}img/correctiv_logo.png" alt="Correctiv" style="height:50px; margin-top:10px"/>
+          </a>
+        </div>
+      </div>
+    </div>
     {% block body %}{% endblock %}
     </div>
   {% endblock %}
 
   <footer class="container" id="footer">
-    {% block footer %}{% endblock %}
+    {% block footer %}
+      <div class="pull-right">
+        <small>
+          <a class="text-muted" href="https://www.correctiv.org/impressum/">Impressum</a>
+        </small>
+      </div>
+    {% endblock %}
   </footer>
 
   <script src="{{ STATIC_URL }}js/jquery.min.js"></script>

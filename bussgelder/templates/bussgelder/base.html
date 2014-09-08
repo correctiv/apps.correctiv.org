@@ -3,13 +3,6 @@
 {% block base_title %}Gerichtliche Zuteilungen{% endblock %}
 
 {% block footer %}
-<hr/>
-<div class="row">
-  <div class="col-lg-6 col-lg-offset-3">
-    <p class="text-muted">
-      <small></small>
-    </p>
-  </div>
-</div>
+{{ block.super }}
 {% include "bussgelder/detail_modal.html" %}
 {% endblock %}
