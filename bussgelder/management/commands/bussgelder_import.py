@@ -6,7 +6,7 @@ from django.conf import settings
 
 from ...models import Fine
 
-BULK_SIZE = 500
+BULK_SIZE = 1000
 
 
 class Command(BaseCommand):
@@ -25,6 +25,7 @@ class Command(BaseCommand):
                 collection = []
 
         Fine.objects.bulk_create(collection)
+        self.stdout.write('Creating aggregates...\n')
         self.create_aggregates()
 
     def get_fine_objects(self, filename):
