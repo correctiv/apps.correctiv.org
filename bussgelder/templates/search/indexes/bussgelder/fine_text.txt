@@ -1,9 +1,7 @@
 {{ object.organisation.name }}
 {{ object.original_name }}
-{{ object.address }}
-{{ object.org_details }}
-{{ object.bank_details }}
-{{ object.department_label }}
-{{ object.department_detail }}
 {{ object.city }}
 {{ object.postcode }}
+{{ object.address }}
+{{ object.department_label }}
+{{ object.department_detail }}
