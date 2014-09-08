@@ -1,0 +1,14 @@
+{% extends "bussgelder/base.html" %}
+
+{% block title %}{{ flatpage.title }}{% endblock %}
+
+{% block body %}
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2">
+    <h2>{{ flatpage.title }}</h2>
+
+    {{ flatpage.content }}
+
+  </div>
+</div>
+{% endblock %}
