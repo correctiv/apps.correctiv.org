@@ -160,6 +160,8 @@ class Fine(models.Model):
 
     @property
     def source_file_url(self):
-        if not self.source_file.rsplit('/', 1)[1].startswith('_'):
-            return 'justizgelder/' + self.source_file
-        return False
+        if self.source_file:
+            if not self.source_file.rsplit('.', 1)[0].endswith('_'):
+                # File is not 'secret'
+                return 'justizgelder/' + self.source_file
+        return ''
