@@ -57,6 +57,7 @@ class FineManager(models.Manager):
             org = Organisation.objects.create(name=row['name'], slug=org_slug)
 
         fine.organisation = org
+        fine.name = row['name']
         fine.original_name = row['orig_name']
         # E.g. data/badenwuerttemberg/2013/justiz/justiz_bawue_2013.csv
         parts = row['path'].split('/')
@@ -112,6 +113,7 @@ class Fine(models.Model):
     DEPARTMENTS_DICT = dict(DEPARTMENTS)
 
     organisation = models.ForeignKey(Organisation, related_name='fines')
+    name = models.CharField(max_length=512)
     original_name = models.CharField(max_length=512)
 
     year = models.SmallIntegerField()
