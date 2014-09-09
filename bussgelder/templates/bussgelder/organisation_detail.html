@@ -89,7 +89,7 @@
         {% for fine in fines %}
         <tr>
           <td>
-            {{ fine.original_name }}
+            {{ fine.name }}
           </td>
           <td class="text-right">
             {{ fine.amount|intcomma_floatformat:2 }}&nbsp;€
