@@ -186,12 +186,12 @@
     <script src="{{ STATIC_URL }}js/jquery.nouislider.min.js"></script>
     <script>
     (function(){
-        var max_value = {{ result.aggregations.max_amount.value|floatformat:0 }};
+        var max_value = {{ result.aggregations.max_amount.value|floatformat:0 }} + 1000;
         if ($('#id_amount_gte').val() === '') {
             $('#id_amount_gte').val("0");
         }
         if ($('#id_amount_lte').val() === '') {
-            $('#id_amount_lte').val('' + (max_value + 1000));
+            $('#id_amount_lte').val('' + max_value);
         }
         $('#amount-range').noUiSlider({
             start: [
@@ -201,9 +201,9 @@
             range: {
                 'min': [ 0 ],
                 '0%': [ 0, 100 ],
-                '20%': [ 11000, 500 ],
-                '50%': [ 100000, 1000 ],
-                'max': [ max_value + 1000 ]
+                '20%': [ Math.min(max_value / 3, 11000), 500 ],
+                '50%': [ Math.min(max_value * 2 / 3, 100000), 1000 ],
+                'max': [ max_value ]
             },
             connect: true
         }).change(function(){
