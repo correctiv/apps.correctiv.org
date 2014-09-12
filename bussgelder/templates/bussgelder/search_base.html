@@ -26,7 +26,10 @@
 {% block body %}
     {% facet_vars "" "getvars" %}
     <div class="row">
-        <div class="col-lg-8 col-lg-offset-3">
+        <div class="col-lg-3 col-md-4 col-sm-12">
+            {% include "_support.html" %}
+        </div>
+        <div class="col-lg-9 col-md-8 col-sm-12">
             <h2>Suche nach Zuwendungsempfängern</h2>
             <form method="get" action="?{{ getvars }}">
                 {{ form.amount_gte }}
