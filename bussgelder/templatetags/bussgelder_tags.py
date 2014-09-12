@@ -1,4 +1,4 @@
-from urlparse import urlsplit, urlunsplit, urlparse, parse_qsl, parse_qs
+from urlparse import urlsplit, urlunsplit, urlparse
 
 from django import template
 from django.http.request import QueryDict
