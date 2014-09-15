@@ -59,6 +59,11 @@ class OrganisationSearchForm(forms.Form):
         'amount_gte'
     )
 
+    def __init__(self, data, **kwargs):
+        data = data.copy()
+        data.setdefault('sort', 'amount:desc')
+        super(OrganisationSearchForm, self).__init__(data=data, **kwargs)
+
     def _search(self, idx, size, query):
         return SearchQueryset(
             idx,
