@@ -26,12 +26,15 @@
   {% block base_body %}
     <div class="main container">
       <div class="row" style="margin-top:10px;">
-        <div class="col-lg-12">
+        <div class="col-lg-9 col-lg-push-3 col-md-8 col-md-push-4 col-sm-6 col-sm-push-6">
           <div class="text-right">
             <a href="https://www.correctiv.org/">
               <img src="{{ STATIC_URL }}img/correctiv_logo.png" alt="Correctiv"/>
             </a>
           </div>
+        </div>
+        <div class="col-lg-3 col-lg-pull-9 col-md-4 col-md-pull-8 col-sm-6 col-sm-pull-6">
+          {% block nav_story_link %}{% endblock %}
         </div>
       </div>
       {% block body %}{% endblock %}

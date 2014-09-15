@@ -2,6 +2,13 @@
 
 {% block base_title %}Gerichtliche Zuteilungen{% endblock %}
 
+{% block nav_story_link %}
+<a class="btn btn-default btn-block" href="http://spendengerichte.correctiv.org/">
+  <span class="glyphicon glyphicon-bookmark"></span>
+  Zur Geschichte „Spendengerichte“
+</a>
+{% endblock %}
+
 {% block footer %}
 {{ block.super }}
 {% include "bussgelder/detail_modal.html" %}
