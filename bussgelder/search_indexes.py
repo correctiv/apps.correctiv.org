@@ -77,13 +77,21 @@ class SearchIndex(object):
         }
 
     def search(self, term, filters=None, size=10, offset=0, **kwargs):
-        result = self.es.search(
-            index=self.index_name,
-            doc_type=self.name,
-            body=self.construct_query(term, filters=filters, **kwargs),
-            size=size,
-            from_=offset
-        )
+        try:
+            result = self.es.search(
+                index=self.index_name,
+                doc_type=self.name,
+                body=self.construct_query(term, filters=filters, **kwargs),
+                size=size,
+                from_=offset
+            )
+        except es_exceptions.TransportError:
+            return {
+                'total': 0,
+                'results': [],
+                'aggregations': {}
+            }
+
         raw_results = result['hits']['hits']
 
         results = []
@@ -164,7 +172,8 @@ class OrganisationIndex(SearchIndex):
                 } for key, value in filters.items() if value]
             }
             non_nested_filters.append(current_filters)
-            filter_list.append({"nested": {
+            filter_list.append({
+                "nested": {
                     "path": "fines",
                     "filter": current_filters
                 }
@@ -181,8 +190,8 @@ class OrganisationIndex(SearchIndex):
             if range_filter:
                 range_filter = {"range": range_filter}
                 filter_list.append(range_filter)
-            else:
-                range_filter = {'match_all': {}}
+        if not range_filter:
+            range_filter = {'match_all': {}}
         if filter_list:
             filter_dict = {"and": filter_list}
             query.update({
