@@ -9,9 +9,9 @@ class OrganisationAdmin(admin.ModelAdmin):
 
 
 class FineAdmin(admin.ModelAdmin):
-    list_display = ('original_name', 'amount', 'state', 'year')
+    list_display = ('name', 'amount', 'state', 'year', 'department', 'department_detail')
     list_filter = ('state', 'department', 'year')
-    search_fields = ['original_name']
+    search_fields = ['original_name', 'department_detail']
     raw_id_fields = ('organisation',)
 
 
