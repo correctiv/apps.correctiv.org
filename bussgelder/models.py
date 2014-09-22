@@ -108,7 +108,7 @@ class Fine(models.Model):
         ('justiz', u'Justizministerium'),
         ('lg', u'Landgericht'),
         ('ag', u'Amtsgericht'),
-        ('olg', u'Oberlandgericht'),
+        ('olg', u'Oberlandesgericht'),
     )
     DEPARTMENTS_DICT = dict(DEPARTMENTS)
 
