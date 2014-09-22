@@ -16,10 +16,24 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         translation.activate(settings.LANGUAGE_CODE)
 
-        fields = ('name', 'original_name', 'amount', 'state', 'year',
-                  'department', 'department_detail')
-        writer = unicodecsv.DictWriter(sys.stdout, fields)
+        fields = {
+            'name': 'name',
+            'original_name': 'orig_name',
+            'amount': 'betrag',
+            'filename': 'path',
+            'note': 'anmerkungen',
+            'amount_received': 'betrag_eingegangen',
+            'address': 'adresse',
+            'file_reference': 'aktenzeichen',
+            'source_file': 'source',
+            'reference_id': 'id',
+            'city': 'ort',
+            'postcode': 'plz'
+        }
+
+        writer = unicodecsv.DictWriter(sys.stdout, fields.values())
         writer.writeheader()
-        qs = Fine.objects.filter(state='bayern', department_detail__startswith='Muenchen')
+        qs = Fine.objects.iterator()
         for fine in qs:
-            writer.writerow(dict([(k, unicode(getattr(fine, k))) for k in fields]))
+            writer.writerow(dict([(v, unicode(getattr(fine, k))) for k, v in
+                            fields.items() if getattr(fine, k, None) is not None]))

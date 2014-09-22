@@ -1,10 +1,6 @@
 # -*- encoding: utf-8 -*-
-import decimal
-
 from django.db import models
 from django.core.urlresolvers import reverse
-
-from slugify import slugify
 
 
 GERMAN_STATES = (
@@ -45,61 +41,6 @@ class FineManager(models.Manager):
     def all_with_amount(self):
         return self.get_queryset().exclude(amount=0.0)
 
-    def create_from_row(self, row, fine=None):
-        if fine is None:
-            fine = Fine()
-
-        org_slug = slugify(row['name'])
-
-        try:
-            org = Organisation.objects.get(slug=org_slug)
-        except Organisation.DoesNotExist:
-            org = Organisation.objects.create(name=row['name'], slug=org_slug)
-
-        fine.organisation = org
-        fine.name = row['name']
-        fine.original_name = row['orig_name']
-        # E.g. data/badenwuerttemberg/2013/justiz/justiz_bawue_2013.csv
-        parts = row['path'].split('/')
-        fine.state = parts[1]
-        fine.year = int(parts[2])
-        fine.department = parts[3]
-        fine.department_detail = parts[4].split('_')[1].title()
-        fine.amount = decimal.Decimal(row['betrag'])
-        if row['betrag_eingegangen']:
-            fine.amount_received = decimal.Decimal(row['betrag_eingegangen'])
-        fine.address = row['adresse']
-        fine.file_reference = row['aktenzeichen']
-
-        fine.bank_details = u'\n'.join(
-            row[k] for k in (
-                'blz',
-                'kto',
-                'kreditinstitut',
-                'bank',
-            ) if row[k])
-
-        fine.org_details = u'\n'.join(
-            row[k] for k in (
-                'kategorie',
-                'notizen',
-                'rest',
-                'thema',
-                'vorsitzender',
-                'wirkungskreis',
-                'zu_haenden'
-            ) if row[k])
-
-        fine.filename = row['path']
-        fine.note = row['anmerkungen']
-        fine.source_file = row['source']
-        fine.reference_id = row['id']
-
-        fine.city = row['ort']
-        fine.postcode = row['plz']
-
-        return fine
-
 
 class Fine(models.Model):
 
@@ -123,7 +64,8 @@ class Fine(models.Model):
     department_detail = models.CharField(max_length=255, blank=True)
 
     amount = models.DecimalField(decimal_places=2, max_digits=19)
-    amount_received = models.DecimalField(null=True, decimal_places=2, max_digits=19)
+    amount_received = models.DecimalField(null=True, decimal_places=2,
+                                          max_digits=19, blank=True)
 
     address = models.TextField(blank=True)
     file_reference = models.CharField(max_length=255, blank=True)
